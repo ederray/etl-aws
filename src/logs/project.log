@@ -1,0 +1,62 @@
+2025-07-30 15:58:21,675 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 15:58:25,124 | ERROR | yfinance | $PETR4.SA: possibly delisted; no price data found  (1d 2025-07-29 -> 2023-07-29) (Yahoo error = "Invalid input - start date cannot be after end date. startDate = 1753758000, endDate = 1690599600")
+2025-07-30 15:58:25,129 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 15:59:50,882 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 15:59:52,230 | ERROR | yfinance | $PETR4.SA: possibly delisted; no price data found  (1d 2025-07-29 -> 2025-07-29)
+2025-07-30 15:59:52,232 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:01:17,694 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:01:17,700 | ERROR | yfinance | $PETR4.SA: possibly delisted; no price data found  (1d 2025-07-29 -> 2025-07-29)
+2025-07-30 16:01:17,703 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:01:33,262 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:01:34,755 | ERROR | yfinance | $PETR4.SA: possibly delisted; no price data found  (1d 2025-07-28 -> 2025-07-28)
+2025-07-30 16:01:34,757 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:02:41,063 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:02:42,383 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:03:58,553 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:04:00,066 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:04:39,812 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:04:41,307 | ERROR | yfinance | $ASAI3.SA: possibly delisted; no price data found  (1d 2025-07-27 -> 2025-07-28)
+2025-07-30 16:04:41,308 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:07:17,541 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:07:18,775 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:16:34,538 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:16:35,158 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:48:01,581 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:48:03,107 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 16:54:44,085 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 16:54:46,470 | WARNING | src.etl.websrapping | 
+2025-07-30 16:54:46,472 | INFO | src.etl.websrapping | Ações capturadas. Inicio da construção do dataset
+2025-07-30 17:54:06,860 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 17:54:55,503 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 17:55:55,294 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 17:56:36,480 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 17:56:43,183 | INFO | src.etl.websrapping | Ações capturadas. Dataset construído: {tbl_cotacao_diaria.shape[0]} linhas.
+2025-07-30 18:01:56,000 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:01:58,115 | INFO | src.etl.websrapping | Ações capturadas. Dataset construído: 2 linhas.
+2025-07-30 18:02:18,253 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:02:20,402 | INFO | src.etl.websrapping | Ações capturadas. Dataset construído: 2 linhas.
+2025-07-30 18:03:19,080 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:03:21,219 | INFO | src.etl.websrapping | Ações capturadas. Dataset construído: 2 linhas.
+2025-07-30 18:15:08,363 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:15:10,427 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 1 linhas.
+2025-07-30 18:16:26,504 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:16:29,077 | ERROR | yfinance | HTTP Error 404: 
+2025-07-30 18:16:30,468 | ERROR | yfinance | $ABEV3;SA: possibly delisted; no price data found  (period=1d) (Yahoo error = "No data found, symbol may be delisted")
+2025-07-30 18:16:30,471 | WARNING | src.etl.websrapping | Nenhum dado retornado para a ação: ABEV3;SA
+2025-07-30 18:16:33,296 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 3 linhas.
+2025-07-30 18:16:38,669 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:16:42,113 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 4 linhas.
+2025-07-30 18:19:37,737 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:19:39,897 | ERROR | src.etl.websrapping | Erro na construção do dataset
+Traceback (most recent call last):
+  File "c:\Users\ederr\Documents\PROJETOS_PYTHON\projetos_fiap\Fase_2\etl-aws\src\etl\websrapping.py", line 57, in gerar_tabela_cotacao_diaria_ibovespa
+    tbl_acao.insert(0, 'ticker', tbl_acao["ticker"])
+  File "c:\Users\ederr\Documents\PROJETOS_PYTHON\projetos_fiap\Fase_2\etl-aws\.venv\Lib\site-packages\pandas\core\frame.py", line 5165, in insert
+    raise ValueError(f"cannot insert {column}, already exists")
+ValueError: cannot insert ticker, already exists
+2025-07-30 18:20:36,832 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:20:42,611 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 4 linhas.
+2025-07-30 18:32:04,137 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 18:34:13,357 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 84 linhas.
+2025-07-30 19:52:08,380 | INFO | src.etl.websrapping | Iniciando o processo de captação dos dados.
+2025-07-30 19:53:50,530 | INFO | src.etl.websrapping | Ações capturadas com sucesso. Dataset final: 84 linhas.

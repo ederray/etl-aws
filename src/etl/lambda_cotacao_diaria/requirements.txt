@@ -1,0 +1,4 @@
+boto3==1.28.36
+pandas==2.1.4
+yfinance==0.2.36
+pyarrow==14.0.2
