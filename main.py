@@ -1,21 +1,25 @@
-# verificação da carteira
-# webscrapping dados b3 (yfinance)
-# eda
-# preprocessing: data clean/wrangl - glue
-# construção do modelo
+"""Arquivo de execução das tarefas"""
+import logging
+import pandas as pd 
+from datetime import date, timedelta
+from src.config.logging_config import setup_logging
+from src.etl.webscrapping import gerar_tabela_cotacao_diaria_ibovespa
+from src.etl.s3 import carregar_dados_parquet_particao_diaria_s3
+from dotenv import load_dotenv
 
-# event-bridge: programar o webscrapping diario
-# lambda: execução do glue e predição do modelo <---
-# glue: webscrapping, transformação dos dados.
-# s3: persistência.
-# step functions: orquestração das etapas
+# instância do objeto logger
+setup_logging()
+logger = logging.getLogger(__name__)
 
-# athena: consulta dos dados
-# painel: visualização dos dados
+# carregamento das variáveis de ambiente
+load_dotenv()
 
+# captura dos dados para a data de hoje
+hoje = date.today()
+tbl_carteira_ibovespa = pd.read_csv("./data/external/tbl_acoes_ibovespa.csv", sep=';')
+tbl_cotacao_diaria = gerar_tabela_cotacao_diaria_ibovespa(lista_acoes = tbl_carteira_ibovespa['ticker'], 
+                                     data_cotacao= hoje ,periodo='1d')
+tbl_cotacao_diaria.head()
 
-# inserir logging,  ok
-# terraform: cicd **
-# monitoramento outliers **
-# alerta de ações com queda de preço
-# testes das funções
+# envio dos dados para o bucket s3
+carregar_dados_parquet_particao_diaria_s3(df=tbl_cotacao_diaria,data_cotacao=hoje)

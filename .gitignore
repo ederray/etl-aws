@@ -1,1 +1,4 @@
 /.env
+/build_lambda_cotacao_diaria.sh
+/lambda_cotacao_diaria
+credentials

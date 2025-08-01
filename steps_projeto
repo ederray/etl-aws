@@ -1,0 +1,30 @@
+# verificação da carteira
+# webscrapping dados b3 (yfinance) ok
+# s3: persistência dos dados na pasta raw ok
+# eda
+# construção do modelo
+# lambda: acionar a execução do glue
+# preprocessing: data clean/wrangl - glue
+# s3: persistência dos dados transformados na pasta refined
+# lambda: acionar a previsão do modelo
+# s3: persistência dos dados de previsao na pasta predicted
+# athena: análise dos dados transformados e dados previstos
+# quicksight: carregamento dos dados no dashboard
+# step functions: ligar as etapas do processo.
+
+# monitoramento outliers **
+# alerta de ações com queda de preço **
+
+# lambda:execução do glue e predição do modelo <---
+# glue: transformação dos dados.
+# s3: persistência.
+# step functions: orquestração das etapas
+# athena: consulta, entendimento e hipóteses dos dados 
+# quicksight: visualização dos dados
+
+# EXTRAS:
+# inserir logging,  ok
+# terraform: cicd **
+# monitoramento outliers **
+# alerta de ações com queda de preço
+# testes das funções

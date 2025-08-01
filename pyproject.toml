@@ -21,7 +21,9 @@ dependencies = [
     "selenium (>=4.34.2,<5.0.0)",
     "webdriver-manager (>=4.0.2,<5.0.0)",
     "pyarrow (==15.0.2)",
-    "yfinance (>=0.2.65,<0.3.0)"
+    "yfinance (>=0.2.65,<0.3.0)",
+    "tenacity (>=9.1.2,<10.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
 ]
 
 [tool.poetry]
