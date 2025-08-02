@@ -3,13 +3,13 @@ import pandas as pd
 import logging
 import yfinance as yf
 import time
-from datetime import datetime 
+from datetime import datetime
 from src.config.constants import CAMPOS_FUNDAMENTALISTAS_SELECIONADOS 
 
 # instância do objeto logger
 logger = logging.getLogger(__name__)
 
-def gerar_tabela_cotacao_diaria_ibovespa(lista_acoes: list[str], data_cotacao: datetime.date, periodo: str) -> pd.DataFrame:
+def gerar_tabela_cotacao_diaria_ibovespa(lista_acoes: list[str], data_inicio: datetime.date, data_cotacao: datetime.date) -> pd.DataFrame:
     """Função que constroi uma dataframe com os dados de cotação da carteira de ações."""
 
     try:
@@ -21,7 +21,7 @@ def gerar_tabela_cotacao_diaria_ibovespa(lista_acoes: list[str], data_cotacao: d
                 # captura as informações da api do yfinance
                 ticker = yf.Ticker(acao)
                 time.sleep(0.2)
-                historico = ticker.history(period=periodo)
+                historico = ticker.history(start=data_inicio, end=data_cotacao)
                 info = ticker.info
 
                 # verifica o conteúdo da tabela
@@ -31,16 +31,16 @@ def gerar_tabela_cotacao_diaria_ibovespa(lista_acoes: list[str], data_cotacao: d
                     continue
 
                 # inserção da data_cotacao no index
-                historico["data_cotacao"] = data_cotacao
-                historico.set_index("data_cotacao", inplace=True)
+                # historico["data_cotacao"] = data_cotacao
+                # historico.set_index("data_cotacao", inplace=True)
 
                 # captura dos dados fundamentalistas da ação
                 dict_dados_info = {k: info.get(k) for k in CAMPOS_FUNDAMENTALISTAS_SELECIONADOS}
 
                 # construção do DataFrame de fundamentos com mesma quantidade de linhas que o histórico
-                dados_fundamentalistas = pd.DataFrame([dict_dados_info] * len(historico))
-                dados_fundamentalistas["data_cotacao"] = data_cotacao
-                dados_fundamentalistas.set_index("data_cotacao", inplace=True)
+                dados_fundamentalistas = pd.DataFrame([dict_dados_info] * len(historico), index=historico.index)
+                #dados_fundamentalistas["data_cotacao"] = data_cotacao
+                #dados_fundamentalistas.set_index("data_cotacao", inplace=True)
 
                 # concatenação dos dados de preço e fundamentos
                 tbl_acao = pd.concat([historico, dados_fundamentalistas], axis=1)

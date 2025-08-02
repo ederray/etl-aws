@@ -608,6 +608,21 @@ files = [
 ]
 
 [[package]]
+name = "holidays"
+version = "0.77"
+description = "Open World Holidays Framework"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "holidays-0.77-py3-none-any.whl", hash = "sha256:74e9e7cbf6eca8dfc672b1c2a9b4e64b1b51c428abb880964440e25c2f812486"},
+    {file = "holidays-0.77.tar.gz", hash = "sha256:61c537c7a159d480a1ab07a09ccc602990ecbeed4e2331c75ea46cf0e68b0513"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+
+[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1884,4 +1899,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "0305659d7efe0257a0d820812b819ac9a913d5d5e4685c09c9f4920ed81fcbc2"
+content-hash = "916d8451183e4ab6a940ec5c80492f10457405cab006f786f4df91f0bcf69926"
