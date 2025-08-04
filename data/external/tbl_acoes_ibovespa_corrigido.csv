@@ -1,6 +1,6 @@
-codigo;tipo;empresa;slug; setor; industria
+codigo;tipo;empresa;slug;setor;Industria
 ABEV3;ON;Ambev S/A;ambev-abev3; Consumo não-cíclico; Bebidas
-ALOS3;ON;Allos;alos3; Imóveis; Atividades Imobiliárias
+ALOS3;ON;Allos;alos3;Imóveis; Atividades Imobiliárias
 ASAI3;ON;Assaí­ Atacadista;assai-asai3; Consumo não-cíclico; Varejo de alimentos e medicamentos
 AURE3;ON;Auren;auren-energia-aure3;Utilidades;Empresas independentes e concessionárias elétricas
 AZZA3;ON;Azzas 2154;azzas-2154-azza3; Consumo cíclico; Varejistas especializados
@@ -15,71 +15,71 @@ BRAP4;PN;Bradespar;bradespar-brap4; Materiais básicos; Metais e Mineração
 BRAV3;ON;Brava Energia SA;3r-petroleum-oleo-e-gas-sa;Energia;Gás e Petróleo
 BRFS3;ON;BRF;brf-brfs3; Consumo não-cíclico; Alimentos e tabaco
 BRKM5;PNA;Braskem;braskem-brkm5; Materiais básicos; Químicos
-CMIG4;PN;Cemig;cemig-cmig4; Utilidades; Empresas independentes e concessionárias elétricas
+CMIG4;PN;Cemig;cemig-cmig4;Utilidades; Empresas independentes e concessionárias elétricas
 CMIN3;ON;CSN Mineracao;csn-mineracao-cmin3; Materiais básicos; Metais e Mineração
 COGN3;ON;Cogna;cogna-cogn3; Serviços acadêmicos e educacionais; Colégio, faculdade e universidade
-CPFE3;ON;CPFL Energia;cpfl-energia-cpfe3; Utilidades; Empresas independentes e concessionárias elétricas
+CPFE3;ON;CPFL Energia;cpfl-energia-cpfe3;Utilidades; Empresas independentes e concessionárias elétricas
 CSAN3;ON;Cosan;cosan-csan3; Consumo não-cíclico; Conglomerados de bens de consumo
 CSNA3;ON;CSN;csn-csna3; Materiais básicos; Metais e Mineração
 CVCB3;ON;CVC Brasil;cvc-brasil-cvcb3; Consumo cíclico; Serviços de hotel e entretenimento
 CXSE3;ON;Caixa Seguridade Participações SA;caixa-seguridade-participacoes;Financeiro;Seguro
-CYRE3;ON;Cyrela;cyrela-realty-cyre3; Imóveis; Atvidades Imobiliárias
+CYRE3;ON;Cyrela;cyrela-realty-cyre3;Imóveis; Atvidades Imobiliárias
 DIRR3;ON;Direcional;direcional-on-nm;Imóveis;Atividades Imobiliárias
-EGIE3;ON;Engie Brasil;engie-brasil-egie3; Utilidades; Empresas independentes e concessionárias elétricas
+EGIE3;ON;Engie Brasil;engie-brasil-egie3;Utilidades; Empresas independentes e concessionárias elétricas
 ELET3;ON;Eletrobras ON;eletrobras-elet3;Utilidades; Empresas independentes e concessionárias elétricas
-ELET6;PNB;Eletrobras PN;eletrobras-elet6; Utilidades; Empresas independentes e concessionárias elétricas
-EMBR3;ON;Embraer;embraer-embr3; Industriais; Transporte Espacial e Defesa
-ENEV3;ON;Eneva;eneva-enev3; Utilidades; Empresas independentes e concessionárias elétricas
-ENGI11;UNIT;Energisa;energisa-engi11; Utilidades; Empresas independentes e concessionárias elétricas
+ELET6;PNB;Eletrobras PN;eletrobras-elet6;Utilidades; Empresas independentes e concessionárias elétricas
+EMBR3;ON;Embraer;embraer-embr3;Industria; Transporte Espacial e Defesa
+ENEV3;ON;Eneva;eneva-enev3;Utilidades; Empresas independentes e concessionárias elétricas
+ENGI11;UNIT;Energisa;energisa-engi11;Utilidades; Empresas independentes e concessionárias elétricas
 EQTL3;ON;Equatorial Energia;equatorial-energia-eqtl3;Utilidades; Empresas independentes e concessionárias elétricas
 FLRY3;ON;Fleury;fleury-flry3; Saúde; Prestação de serviços de Saúde
 GGBR4;PN;Gerdau;gerdau-ggbr4; Materiais básicos; Metais e Mineração
 GOAU4;PN;Gerdau Metalúrgica;gerdau-met-goau4; Materiais básicos; Metais e Mineração
 HAPV3;ON;Hapvida;hapvida-hapv3; Saúde; Prestação de serviços de Saúde
 HYPE3;ON;Hypera;hypera-pharma-hype3; Saúde; Produtos farmacêuticos
-IGTI11;UNIT;Iguatemi S.A;iguatemi-s-a-igti11; Imóveis; Atvidades Imobiliárias
+IGTI11;UNIT;Iguatemi S.A;iguatemi-s-a-igti11;Imóveis; Atvidades Imobiliárias
 IRBR3;ON;IRB Brasil RE;irb-brasil-irbr3; Financeiro;Seguro
-ISAE4;PN;ISA Energia;isa-energia-brasil-isae4; Utilidades; Empresas independentes e concessionárias elétricas
+ISAE4;PN;ISA Energia;isa-energia-brasil-isae4;Utilidades; Empresas independentes e concessionárias elétricas
 ITSA4;PN;Itaúsa;itausa-itsa4; Financeiro; Serviços bancários
 ITUB4;PN;Itaú Unibanco;itau-unibanco-itub4; Financeiro; Serviços bancários
 KLBN11;UNIT;Klabin;klabin-klbn11; Materiais básicos; Contêineres e Embalagens
 LREN3;ON;Lojas Renner;lojas-renner-lren3; Consumo cíclico; Varejistas especializados
 MGLU3;ON;Magazine Luiza;magazine-luiza-mglu3; Consumo cíclico; Varejo diversificado
-MOTV3;ON;Motiva SA;motiva-sa-motv3; Industriais; Infraestrutura de transportes
+MOTV3;ON;Motiva SA;motiva-sa-motv3;Industria; Infraestrutura de transportes
 MRFG3;ON;Marfrig;marfrig-mrfg3; Consumo não-cíclico; Alimentos e tabaco
-MRVE3;ON;MRV;mrv-engenharia-mrve3; Imóveis; Atvidades Imobiliárias
-MULT3;ON;Multiplan;multiplan-mult3; Imóveis; Atvidades Imobiliárias
+MRVE3;ON;MRV;mrv-engenharia-mrve3;Imóveis; Atvidades Imobiliárias
+MULT3;ON;Multiplan;multiplan-mult3;Imóveis; Atvidades Imobiliárias
 NATU3;ON;Natura;natura-ntco3; Consumo não-cíclico; Serviços e produtos pessoais e domésticos
 PCAR3;ON;Pão de açúcar;pao-de-acucar-pcar3; Consumo não-cíclico; Varejo de alimentos e medicamentos
 PETR3;ON;Petrobras;petrobras-petr3;Energia; Gás e Petróleo
-PETR4;PN;Petrobras;petrobras-petr4; Energia; Gás e Petróleo
+PETR4;PN;Petrobras;petrobras-petr4;Energia; Gás e Petróleo
 PETZ3;ON;Petz;petz-petz3; Consumo cíclico; Varejistas especializados
 POMO4;PN;Marcopolo;marcopolo-pomo4; Consumo cíclico; Automóveis e peças
-PRIO3;ON;PetroRio;petrorio-prio3; Energia; Gás e Petróleo
+PRIO3;ON;PetroRio;petrorio-prio3;Energia; Gás e Petróleo
 PSSA3;ON;Porto Seguro;porto-seguro-pssa3; Financeiro; Seguro
 RADL3;ON;RaiaDrogasil;rd-radl3; Consumo não-cíclico; Varejo de alimentos e medicamentos
-RAIL3;ON;Rumo Logística;rumo-log-rail3; Industrias; Serviços de frete e logística
-RAIZ4;PN;Raizen;raizen-raiz4; Energia; Gás e Petróleo
+RAIL3;ON;Rumo Logística;rumo-log-rail3;Industrias; Serviços de frete e logística
+RAIZ4;PN;Raizen;raizen-raiz4;Energia; Gás e Petróleo
 RDOR3;ON;Rede D'Or;rede-dor-rdor3; Saúde;Prestação de serviços de Saúde
-RECV3;ON;PetroReconcavo;petroreconcavo-recv3; Energia; Gás e Petróleo
-RENT3;ON;Localiza;localiza-rent3; Industriais; Serviços de transporte de passageiros
+RECV3;ON;PetroReconcavo;petroreconcavo-recv3;Energia; Gás e Petróleo
+RENT3;ON;Localiza;localiza-rent3;Industria; Serviços de transporte de passageiros
 SANB11;UNIT;Santander Brasil;santander-br-sanb11; Financeiro; Serviços bancários
 SBSP3;ON;Sabesp;sabesp-sbsp3;Utilidades; Concessionárias de água e relacionados
 SLCE3;ON;SLC Agricola;slc-agricola-slce3; Consumo não-cíclico; Alimentos e tabaco
 SMFT3;ON;Smart Fit;smartfit-smft3; Consumo cíclico; Serviços de hotel e entretenimento
 SMTO3;ON;Sao Martinho;sao-martinho-smto3; Consumo não-cíclico; Alimentos e tabaco
-STBP3;ON;Santos Brasil;santos-brasil-stbp3; Industriais; Infraestrutura de transportes
+STBP3;ON;Santos Brasil;santos-brasil-stbp3;Industria; Infraestrutura de transportes
 SUZB3;ON;Suzano;suzano-papel-suzb3; Materiais básicos; Papel e Produtos Florestais
-TAEE11;UNIT;Taesa;taesa-taee11; Utilidades; Empresas independentes e concessionárias elétricas
+TAEE11;UNIT;Taesa;taesa-taee11;Utilidades; Empresas independentes e concessionárias elétricas
 TOTS3;ON;Totvs;totvs-tots3; Tecnologia; Serviços de software e TI
-UGPA3;ON;Ultrapar;ultrapar-ugpa3; Energia; Gás e Petróleo
+UGPA3;ON;Ultrapar;ultrapar-ugpa3;Energia; Gás e Petróleo
 USIM5;PNA;Usiminas;usiminas-usim5; Materiais básicos; Metais e Mineração
 VALE3;ON;Vale;vale-vale3; Materiais básicos; Metais e Mineração
 VIVT3;ON;Telefonica Brasil;telef-brasil-vivt3; Tecnologia; Serviços de telecomunicação
-WEGE3;ON;Weg;weg-wege3; Industriais; Máquinas, Ferramentas, veículos pesados, trens e navios
+WEGE3;ON;Weg;weg-wege3;Industria; Máquinas, Ferramentas, veículos pesados, trens e navios
 YDUQ3;ON;Yduqs;yduqs-yduq3; Serviços acadêmicos e educacionais; Colégio, faculdade e universidade
 CPLE6;PNB; Companhia Paranaense de Energia COPEL;copel-pnb;Utilidades;Empresas independentes e concessionárias elétricas
 TIMS3;ON;TIM SA;tim-part-s-a-on-nm;Tecnologia;Serviços de telecomunicação
-VAMO3;ON;Grupo Vamos;grupo-vamos-sa;Industriais;Serviços de frete e logística
+VAMO3;ON;Grupo Vamos;grupo-vamos-sa;Industria;Serviços de frete e logística
 VBBR3;ON;Vibra Energia SA;petrobras-distribuidora;Energia;Gás e Petróleo
 VIVA3;ON;Vivara Participações SA;vivara-participacoes-sa;Consumo cíclico;Varejistas especializados

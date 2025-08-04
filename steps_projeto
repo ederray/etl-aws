@@ -1,7 +1,7 @@
 # verificação da carteira
 # webscrapping dados b3 (yfinance) ok
 # s3: persistência dos dados na pasta raw ok
-# eda
+# eda -- falta contextualizar
 # construção do modelo
 # lambda: acionar a execução do glue
 # preprocessing: data clean/wrangl - glue
@@ -9,8 +9,11 @@
 # lambda: acionar a previsão do modelo
 # s3: persistência dos dados de previsao na pasta predicted
 # athena: análise dos dados transformados e dados previstos
-# quicksight: carregamento dos dados no dashboard
 # step functions: ligar as etapas do processo.
+
+# arquitetura do projeto
+# video
+# readme
 
 # monitoramento outliers **
 # alerta de ações com queda de preço **
