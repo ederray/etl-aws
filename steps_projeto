@@ -2,33 +2,33 @@
 # webscrapping dados b3 (yfinance) ok
 # s3: persistência dos dados na pasta raw ok
 # eda -- falta contextualizar
-# construção do modelo
-# lambda: acionar a execução do glue
-# preprocessing: data clean/wrangl - glue
-# s3: persistência dos dados transformados na pasta refined
+# construção do modelo -- em andamento
+# lambda: acionar a execução do glue --ok
+# preprocessing: data clean/wrangl - glue ---ok
+# s3: persistência dos dados transformados na pasta refined --ok
 # lambda: acionar a previsão do modelo
 # s3: persistência dos dados de previsao na pasta predicted
-# athena: análise dos dados transformados e dados previstos
+# athena: análise dos dados transformados e dados previstos --AQUI
+# cloudwatch: monitoramento do modelo: outliers ou variações
 # step functions: ligar as etapas do processo.
 
-# arquitetura do projeto
-# video
+# arquitetura do projeto -- REFINAR
+# video ok
 # readme
 
 # monitoramento outliers **
 # alerta de ações com queda de preço **
 
 # lambda:execução do glue e predição do modelo <---
-# glue: transformação dos dados.
-# s3: persistência.
-# step functions: orquestração das etapas
+# glue: transformação dos dados. ok
+# s3: persistência. ok
+# step functions: orquestração das etapas FORA
 # athena: consulta, entendimento e hipóteses dos dados 
-# quicksight: visualização dos dados
 
 # EXTRAS:
 # inserir logging,  ok
-# terraform: cicd **
-# monitoramento outliers **
-# alerta de ações com queda de preço
-# testes das funções
-# criar makefile
+# terraform: cicd ** FORA
+# monitoramento outliers ** AVALIACAO
+# alerta de ações com queda de preço AVALIACAO
+# testes das funções AVALIACAO
+# criar makefile AGUARDANDO

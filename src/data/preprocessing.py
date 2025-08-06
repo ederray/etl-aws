@@ -11,7 +11,6 @@ from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 
-
 # instância do objeto logger
 logger = logging.getLogger(__name__)
 

@@ -18,7 +18,7 @@ load_dotenv()
 hoje = date.today()
 tbl_carteira_ibovespa = pd.read_csv("./data/external/tbl_acoes_ibovespa.csv", sep=';')
 tbl_cotacao_diaria = gerar_tabela_cotacao_diaria_ibovespa(lista_acoes = tbl_carteira_ibovespa['ticker'], 
-                                     data_cotacao= hoje)
+                                     data_inicio=hoje, data_cotacao=hoje+timedelta(1))
 tbl_cotacao_diaria.head()
 
 # envio dos dados para o bucket s3
