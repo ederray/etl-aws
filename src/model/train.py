@@ -1,23 +1,95 @@
 """Funções de treino e construção do pipeline do modelo"""
 import logging
+import numpy as np
 import pandas as pd
-import shap
 import category_encoders as ce
-import graphviz
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, PowerTransformer, OneHotEncoder
+from sklearn.feature_selection import SelectKBest, f_regression
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn.tree import plot_tree 
-from sklearn.metrics import root_mean_squared_error, mean_absolute_error
+from sklearn.metrics import root_mean_squared_error, mean_absolute_error, r2_score
+from catboost import CatBoostRegressor
 from sklearn.model_selection import TimeSeriesSplit
 import matplotlib.pyplot as plt
+from typing import List
 
 
 # instância do objeto logger
 logger = logging.getLogger(__name__)
 
+
+
+def selecionar_features(df: pd.DataFrame, 
+                       features: List[str],
+                       target: str,
+                       k: int = 20) -> List[str]:
+    """
+    Seleciona as K melhores features usando o teste estatístico f_regression.
+
+    Args:
+        df (pd.DataFrame): DataFrame contendo as features e o target.
+        features (List[str]): Lista de nomes das features a serem avaliadas.
+        target (str): Nome da coluna do target.
+        k (int): Número de melhores features a serem selecionadas.
+
+    Returns:
+        List[str]: Uma lista com os nomes das features selecionadas.
+    """
+    df = df.copy().dropna()
+    
+    X = df[features]
+    y = df[target]
+
+    # Configura o seletor para encontrar as K melhores features
+    selector = SelectKBest(score_func=f_regression, k=k)
+    
+    # Aplica a seleção
+    selector.fit(X, y)
+    
+    # Obtém as features selecionadas
+    features_selecionadas = X.columns[selector.get_support()].tolist()
+    
+    return features_selecionadas
+
+
+def split_data_by_date(df: pd.DataFrame, cutoff_date: str, target: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    """
+    Separa o DataFrame em conjuntos de treino e teste usando uma data de corte.
+
+    Args:
+        df (pd.DataFrame): DataFrame com DatetimeIndex e dados de várias ações.
+        cutoff_date (str): Data de corte no formato 'YYYY-MM-DD'.
+        target (str): Nome da coluna da variável target (y).
+
+    Returns:
+        tuple: (X_train, X_test, y_train, y_test)
+    """
+    # Certifique-se de que o índice é um DatetimeIndex e está ordenado
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError("O índice do DataFrame deve ser um DatetimeIndex.")
+    
+    df_sorted = df.sort_index()
+
+    # Filtra os dados de treino
+    train_df = df_sorted.loc[df_sorted.index < cutoff_date]
+    
+    # Filtra os dados de teste
+    test_df = df_sorted.loc[df_sorted.index >= cutoff_date]
+    
+    # Separa X e y para treino
+    X_train = train_df.drop(columns=[target])
+    y_train = train_df[target]
+    
+    # Separa X e y para teste
+    X_test = test_df.drop(columns=[target])
+    y_test = test_df[target]
+    
+    print(f"Dados de treino: {train_df.index.min().date()} a {train_df.index.max().date()}")
+    print(f"Dados de teste: {test_df.index.min().date()} a {test_df.index.max().date()}")
+    
+    return X_train, X_test, y_train, y_test
 
 def separar_dados_treino_teste_loc_acao(df: pd.DataFrame,target: str,coluna_acao: str,dias_treino: int = 6,dias_teste: int = 3) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
@@ -78,7 +150,6 @@ def separar_dados_treino_teste_loc_acao(df: pd.DataFrame,target: str,coluna_acao
 
     return X_train, X_test, y_train, y_test
 
-
 def criar_preprocessor(target_encoder: str,colunas_categoricas_onehot: list[str],colunas_numericas: list[str]) -> ColumnTransformer:
     """
     Cria um ColumnTransformer com:
@@ -113,9 +184,57 @@ def criar_preprocessor(target_encoder: str,colunas_categoricas_onehot: list[str]
         # Construção do ColumnTransformer final
         preprocessor = ColumnTransformer(
             transformers=[
-                ('target_encoder_ticker', ce.TargetEncoder(cols=[target_encoder]), [target_encoder]),
-                ('onehot_encoder_others', onehot_encoder_pipeline, colunas_categoricas_onehot),
-                ('numeric_features', numeric_pipeline, colunas_numericas)
+                ('target_encoder', ce.TargetEncoder(cols=[target_encoder]), [target_encoder]),
+                ('cat_features', onehot_encoder_pipeline, colunas_categoricas_onehot),
+                ('num_features', numeric_pipeline, colunas_numericas)
+            ],
+            remainder='drop',
+            verbose_feature_names_out=False
+        )
+
+        logger.info("Pipeline de pré-processamento construído com sucesso.")
+        return preprocessor
+
+    except Exception as e:
+        logger.error(f"Erro ao criar pipeline de pré-processamento: {e}")
+        raise
+
+def criar_preprocessor_sem_target_encoder(colunas_categoricas_onehot: list[str],colunas_numericas: list[str]) -> ColumnTransformer:
+    """
+    Cria um ColumnTransformer com:
+    - TargetEncoder para a coluna do ticker.
+    - OneHotEncoder para colunas categóricas restantes.
+    - PowerTransformer + StandardScaler para colunas numéricas.
+    
+    Args:
+        target_encoder (str): Nome da coluna a ser codificada via TargetEncoder.
+        colunas_categoricas_onehot (list[str]): Lista de colunas para OneHotEncoding.
+        colunas_numericas (list[str]): Lista de colunas numéricas para transformação.
+
+    Returns:
+        ColumnTransformer: Pré-processador completo.
+    """
+    logger.info("Iniciando construção do pipeline de pré-processamento.")
+
+    try:
+        # Pipeline para colunas categóricas (exceto ticker)
+        onehot_encoder_pipeline = Pipeline([
+            ('imputer', SimpleImputer(strategy='most_frequent')),
+            ('onehot_encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+        ])
+
+        # Pipeline para colunas numéricas
+        numeric_pipeline = Pipeline([
+            ('imputer', SimpleImputer(strategy='mean')),
+            ('power_transform', PowerTransformer(method='yeo-johnson')),
+            ('scaler', StandardScaler())
+        ])
+
+        # Construção do ColumnTransformer final
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ('cat_features', onehot_encoder_pipeline, colunas_categoricas_onehot),
+                ('num_features', numeric_pipeline, colunas_numericas)
             ],
             remainder='passthrough',
             verbose_feature_names_out=False
@@ -128,60 +247,50 @@ def criar_preprocessor(target_encoder: str,colunas_categoricas_onehot: list[str]
         logger.error(f"Erro ao criar pipeline de pré-processamento: {e}")
         raise
 
-def treinar_sarimax_por_acao_com_exog(df: pd.DataFrame,coluna_acao: str,coluna_target: str,colunas_exogenas: list[str], ordem: tuple = (1, 1, 1),ordem_sazonal: tuple = (0, 0, 0, 0)) -> dict:
-    """
-    Treina e armazena um modelo SARIMAX para cada ação em um DataFrame,
-    incluindo variáveis exógenas (features).
-
-    Args:
-        df (pd.DataFrame): DataFrame contendo todas as ações e seus dados.
-                           O índice DEVE ser DatetimeIndex.
-        coluna_acao (str): Nome da coluna que identifica cada ação (ex: 'ticker').
-        coluna_target (str): Nome da coluna da variável target (y).
-        colunas_exogenas (list[str]): Uma lista com os nomes das colunas de features (X).
-        ordem (tuple): A tupla (p, d, q) para a ordem do SARIMAX.
-        ordem_sazonal (tuple): A tupla (P, D, Q, S) para a ordem sazonal do SARIMAX.
-
-    Returns:
-        dict: Um dicionário onde as chaves são os nomes das ações (tickers)
-              e os valores são os modelos SARIMAX treinados.
-    """
+def treinar_sarimax_por_acao_com_exog(df: pd.DataFrame, coluna_acao: str, coluna_target: str,
+                                     colunas_exogenas: list[str]) -> dict:
+    
     if not isinstance(df.index, pd.DatetimeIndex):
-        logger.error("O índice do DataFrame deve ser um DatetimeIndex para usar SARIMAX.")
+        logger.error("O índice do DataFrame deve ser um DatetimeIndex.")
         raise ValueError("O índice do DataFrame deve ser um DatetimeIndex.")
     
     modelos_sarimax = {}
+    ORDEM_ARIMA = (1, 0, 1)
     
-    # Itera sobre cada grupo (ação) para treinar um modelo separado
-    for acao, grupo in df.groupby(coluna_acao):
+    logger.info(f"Usando parâmetros ARIMA: {ORDEM_ARIMA}. Sazonalidade removida.")
+    
+    # Itera sobre cada ação única
+    for acao in df[coluna_acao].unique():
         logger.info(f"Treinando modelo SARIMAX para a ação: {acao}")
         
-        # Separa a série target (endógena) e o DataFrame de features (exógenas)
-        serie_endog = grupo[coluna_target]
-        df_exog = grupo[colunas_exogenas] 
+        # Filtra dados para a ação
+        df_acao = df[df[coluna_acao] == acao]
+        
+        # Endog: série temporal da coluna target
+        endog = df_acao[coluna_target]
+        
+        # Exog: dataframe das colunas exógenas
+        exog = df_acao[colunas_exogenas] if colunas_exogenas else None
         
         try:
-            # Tenta ajustar o modelo SARIMAX para a série
             modelo = SARIMAX(
-                endog=serie_endog,
-                exog=df_exog, # Variáveis exógenas são passadas aqui
-                order=ordem,
-                freq='B',
-                seasonal_order=ordem_sazonal,
+                endog=endog,
+                exog=exog,
+                order=ORDEM_ARIMA,
                 enforce_stationarity=False,
                 enforce_invertibility=False
             )
             resultados = modelo.fit(disp=False)
-            
-            # Armazena o modelo treinado no dicionário
             modelos_sarimax[acao] = resultados
             logger.info(f"Modelo SARIMAX para {acao} treinado com sucesso.")
-            
+        
         except Exception as e:
-            logger.error(f"Erro ao treinar SARIMAX para {acao}: {e}")
+            logger.error(f"Erro ao treinar SARIMAX para {acao}: {e}. Pulando esta ação.")
             continue
-
+    
     return modelos_sarimax
+
+
 
 
 
@@ -211,7 +320,40 @@ def criar_pipeline(preprocessor, modelo_final):
         logger.error(f"Erro ao criar pipeline: {e}")
         raise
 
-
+def criar_pipeline_catboost(X_treino):
+    """
+    Cria e retorna o pipeline completo para o modelo CatBoost.
+    """
+    # Define colunas numéricas e categóricas
+    colunas_numericas = X_treino.select_dtypes(include=np.number).columns.tolist()
+    colunas_categoricas = ['ticker', 'tipo', 'setor', 'industria']
+    
+    # Define o pré-processador
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), colunas_numericas),
+            ('cat', 'passthrough', colunas_categoricas)
+        ],
+        remainder='drop'
+    )
+    
+    # Define os índices das colunas categóricas para o CatBoost
+    cat_features_indices = list(range(len(colunas_numericas), len(colunas_numericas) + len(colunas_categoricas)))
+    
+    # Cria a instância do modelo CatBoost
+    catboost_model = CatBoostRegressor(
+        random_state=42, 
+        verbose=0,
+        cat_features=cat_features_indices
+    )
+    
+    # Cria e retorna o pipeline
+    pipeline = Pipeline(steps=[
+        ('preprocessador', preprocessor),
+        ('modelo', catboost_model)
+    ])
+    
+    return pipeline
 
 def ajuste_pipeline_com_grid_search():
     pass
@@ -222,9 +364,11 @@ def gerar_metricas(y_true, y_pred):
     Gera e imprime métricas de avaliação para modelos de regressão.
     """
     mae = mean_absolute_error(y_true, y_pred)
+    rmse = root_mean_squared_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
     # Adicione outras métricas que você precisar
     print(f"MAE: {mae:.4f}")
+    print(f"RMSE: {rmse:.4f}")
     print(f"R2 Score: {r2:.4f}")
 
 

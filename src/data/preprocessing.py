@@ -1,6 +1,7 @@
 """Funções de tratamento dos dados"""
-from ipywidgets import interact
+from IPython.display import display
 import holidays
+from ipywidgets import interact, HTML, Output, Dropdown, VBox
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -84,7 +85,9 @@ def boxplot_analise_descritiva_categorica(df: pd.DataFrame, distribuicao: list[f
 
             # Aplica minmax_scale
             scaler = StandardScaler()
-            dados_normalizados = pd.DataFrame(scaler.fit_transform(dados_numericos), columns=dados_numericos.columns)
+            norm = PowerTransformer(method='yeo-johnson')
+            dados_normalizados = pd.DataFrame(scaler.fit_transform(norm.fit_transform(dados_numericos)), 
+                columns=dados_numericos.columns)
 
             # Cria boxplot com as colunas no eixo X
             plt.figure(figsize=(14, 6))
@@ -316,30 +319,33 @@ def transformacao_ciclica(df: DataFrame, dias_uteis:bool=False) -> DataFrame:
         logger.error(e)
     return df
 
-def grafico_decomposicao_temporal(df: DataFrame, target: str, n: int):
-    """Função para construção de uma decomposição de série temporal."""
-    decomposicao = seasonal_decompose(df[target], model='additive', period=n)
-    decomposicao.plot()
-    plt.tight_layout()
-    return plt.show()
-
 def grafico_decomposicao_temporal_interativo(df: pd.DataFrame, target: str, period: int = 7):
     """
     Cria um gráfico de decomposição temporal interativo, selecionando o ticker.
-    
+
     Args:
-        df (pd.DataFrame): DataFrame contendo a série temporal.
+        df (pd.DataFrame): DataFrame contendo a série temporal com índice de datas.
         target (str): Nome da coluna de valores (por exemplo, 'Close').
         period (int): Período para decomposição sazonal (ex: 7 dias, 12 meses, etc).
     """
 
     tickers = sorted(df['ticker'].dropna().unique())
+    
+    dropdown = Dropdown(
+        options=tickers,
+        description='Ticker:',
+        layout={'width': '300px'}
+    )
 
-    @interact(ticker=tickers)
-    def decompor(ticker):
-        try:
-            serie = df[df['ticker'] == ticker].sort_index()
+    output = Output()
 
+    def atualizar_grafico(change):
+        output.clear_output(wait=True)
+
+        ticker = change['new']
+        serie = df[df['ticker'] == ticker].sort_index()
+
+        with output:
             if serie.empty:
                 print(f"Nenhum dado encontrado para {ticker}")
                 return
@@ -348,14 +354,24 @@ def grafico_decomposicao_temporal_interativo(df: pd.DataFrame, target: str, peri
                 print(f"Coluna {target} não encontrada.")
                 return
 
-            resultado = seasonal_decompose(serie[target], model='additive', period=period)
-            resultado.plot()
-            plt.suptitle(f'Decomposição Temporal: {ticker}', fontsize=14)
-            plt.tight_layout()
-            plt.show()
+            try:
+                resultado = seasonal_decompose(serie[target], model='additive', period=period)
+                fig = resultado.plot()
+                fig.suptitle(f'Decomposição Temporal: {ticker}', fontsize=14)
+                fig.tight_layout()
+                plt.show()
+                plt.close(fig)
 
-        except Exception as e:
-            print(f"Erro na decomposição: {e}")
+            except Exception as e:
+                print(f"Erro na decomposição: {e}")
+
+    # Conecta o dropdown ao handler
+    dropdown.observe(atualizar_grafico, names='value')
+
+    # Força render inicial com o primeiro ticker
+    dropdown.value = tickers[0]
+
+    display(VBox([dropdown, output]))
 
 
 
@@ -377,28 +393,37 @@ def testar_estacionariedade(serie, nome="Série"):
 def testar_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close'):
     """
     Interface interativa para testar estacionariedade de uma série temporal por ticker.
-
-    Args:
-        df (pd.DataFrame): DataFrame com colunas 'ticker' e uma coluna de valor numérico (ex: 'close').
-        coluna_valor (str): Nome da coluna numérica a ser testada (default: 'close').
     """
     tickers = sorted(df['ticker'].dropna().unique())
+    
+    # Cria um widget HTML vazio para exibir o resultado
+    resultado_html = HTML()
 
-    @interact(ticker=tickers)
     def analisar(ticker):
         serie = df[df['ticker'] == ticker][coluna_valor]
         resultado = adfuller(serie.dropna())
 
-        print(f"\n🔍 Teste ADF - {coluna_valor} | Ticker: {ticker}")
-        print(f"ADF Statistic: {resultado[0]:.4f}")
-        print(f"p-value: {resultado[1]:.4f}")
+        # Constrói o texto do resultado como uma string formatada
+        resultado_string = f"""
+        <p>🔍 <strong>Teste ADF - {coluna_valor} | Ticker: {ticker}</strong></p>
+        <ul>
+            <li>ADF Statistic: {resultado[0]:.4f}</li>
+            <li>p-value: {resultado[1]:.4f}</li>
+        """
         for k, v in resultado[4].items():
-            print(f"Critério {k}%: {v:.4f}")
-
+            resultado_string += f"<li>Critério {k}%: {v:.4f}</li>"
+        
         if resultado[1] < 0.05:
-            print("✅ Série estacionária (rejeita H₀)")
+            resultado_string += "</ul><p>✅ Série estacionária (rejeita H₀)</p>"
         else:
-            print("⚠️ Série NÃO estacionária (não rejeita H₀)")
+            resultado_string += "</ul><p>⚠️ Série NÃO estacionária (não rejeita H₀)</p>"
+
+        # Atualiza o conteúdo do widget HTML
+        resultado_html.value = resultado_string
+
+    # Exibe o widget interativo e o widget HTML
+    interact(analisar, ticker=tickers)
+    display(resultado_html)
 
 
 def diferenciar_serie_temporal(df: pd.DataFrame, target:str) -> pd.DataFrame:
@@ -439,18 +464,36 @@ def grafico_acf_interativo(df: pd.DataFrame, max_lags: int, coluna_valor: str = 
     """
     tickers = sorted(df['ticker'].dropna().unique())
 
-    @interact(ticker=tickers)
-    def plotar_acf(ticker):
-        serie = df[df['ticker'] == ticker][coluna_valor].dropna()
-        if serie.empty:
-            print(f"Nenhuma série disponível para {ticker}")
-            return
+    dropdown = Dropdown(
+        options=tickers,
+        description='Ticker:',
+        layout={'width': '300px'}
+    )
 
-        plt.figure(figsize=(10, 4))
-        plot_acf(serie, lags=max_lags)
-        plt.title(f'ACF - {coluna_valor} | Ticker: {ticker}')
-        plt.tight_layout()
-        plt.show()
+    output = Output()
+
+    def atualizar_acf(change):
+        output.clear_output(wait=True)
+        ticker = change['new']
+
+        serie = df[df['ticker'] == ticker][coluna_valor].dropna()
+
+        with output:
+            if serie.empty:
+                print(f"Nenhuma série disponível para {ticker}")
+                return
+
+            plt.figure(figsize=(10, 4))
+            plot_acf(serie, lags=max_lags)
+            plt.title(f'ACF - {coluna_valor} | Ticker: {ticker}')
+            plt.tight_layout()
+            plt.show()
+            plt.close()  # <- fecha a figura para evitar acumulação
+
+    dropdown.observe(atualizar_acf, names='value')
+    dropdown.value = tickers[0]  # força exibição inicial
+
+    display(VBox([dropdown, output]))
 
 def grafico_pacf_interativo(df: pd.DataFrame, max_lags: int, coluna_valor: str = 'close', metodo: str = 'ywm'):
     """
@@ -464,29 +507,46 @@ def grafico_pacf_interativo(df: pd.DataFrame, max_lags: int, coluna_valor: str =
     """
     tickers = sorted(df['ticker'].dropna().unique())
 
-    @interact(ticker=tickers)
-    def plotar_pacf(ticker):
+    dropdown = Dropdown(
+        options=tickers,
+        description='Ticker:',
+        layout={'width': '300px'}
+    )
+
+    output = Output()
+
+    def atualizar_pacf(change):
+        output.clear_output(wait=True)
+        ticker = change['new']
         serie = df[df['ticker'] == ticker][coluna_valor].dropna()
-        if serie.empty:
-            print(f"Nenhuma série disponível para {ticker}")
-            return
 
-        limite = len(serie) // 2
-        lags_ajustado = min(max_lags, limite)
-        if lags_ajustado < max_lags:
-            print(f"[Atenção] Série muito curta. Reduzindo lags de {max_lags} para {lags_ajustado}.")
+        with output:
+            if serie.empty:
+                print(f"Nenhuma série disponível para {ticker}")
+                return
 
-        plt.figure(figsize=(10, 4))
-        plot_pacf(serie, lags=lags_ajustado, method=metodo)
-        plt.title(f'PACF - {coluna_valor} | Ticker: {ticker}')
-        plt.tight_layout()
-        plt.show()
+            limite = len(serie) // 2
+            lags_ajustado = min(max_lags, limite)
+            if lags_ajustado < max_lags:
+                print(f"[Atenção] Série muito curta. Reduzindo lags de {max_lags} para {lags_ajustado}.")
+
+            plt.figure(figsize=(10, 4))
+            plot_pacf(serie, lags=lags_ajustado, method=metodo)
+            plt.title(f'PACF - {coluna_valor} | Ticker: {ticker}')
+            plt.tight_layout()
+            plt.show()
+            plt.close()
+
+    dropdown.observe(atualizar_pacf, names='value')
+    dropdown.value = tickers[0]  # força execução inicial
+
+    display(VBox([dropdown, output]))
 
 
 def gerar_features_temporais(df: pd.DataFrame, 
                               coluna_valor: str,
-                              lags: list = [1, 2, 3, 5],
-                              janelas_rolling: list = [3, 5],
+                              lags: list = [1,3,5,7,15,30,60,90],
+                              janelas_rolling: list = [3,5,7,15,30,60,90],
                               grupo: str = 'ticker') -> pd.DataFrame:
     """
     Gera lags, médias móveis e volatilidades para séries temporais diferenciadas.
@@ -515,3 +575,26 @@ def gerar_features_temporais(df: pd.DataFrame,
         df[f'retorno_acumulado_{janela}_{coluna_valor}'] = df.groupby(grupo)[coluna_valor].transform(lambda x: x.shift(1).rolling(janela).sum())
 
     return df
+
+
+# novas features técnicas
+def calcular_rsi(df, window=14):
+    delta = df['Close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+
+def calcular_macd(df, fast_period=12, slow_period=26, signal_period=9):
+    exp1 = df['Close'].ewm(span=fast_period, adjust=False).mean()
+    exp2 = df['Close'].ewm(span=slow_period, adjust=False).mean()
+    macd = exp1 - exp2
+    signal = macd.ewm(span=signal_period, adjust=False).mean()
+    return macd, signal
+
+
+
+
+
