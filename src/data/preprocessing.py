@@ -426,19 +426,18 @@ def testar_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close
     display(resultado_html)
 
 
-def diferenciar_serie_temporal(df: pd.DataFrame, target:str) -> pd.DataFrame:
+def diferenciar_serie_temporal(df: pd.DataFrame, target: str) -> pd.DataFrame:
     """
-    Aplica diferenciação de primeira ordem na coluna 'Close' agrupando por 'ticker'.
+    Aplica diferenciação de primeira ordem na coluna target agrupando por 'ticker'.
 
     Args:
         df (pd.DataFrame): DataFrame com colunas 'ticker' e 'Close'.
 
     Returns:
-        pd.DataFrame: DataFrame com nova coluna 'Close_diff'.
+        pd.DataFrame: DataFrame com nova coluna 'target_diff'.
     """
     df = df.copy()
-    df['Close_diff'] = df.groupby('ticker')[target].diff()
-    df.dropna(inplace=True)
+    df[f'{target}_diff'] = df.groupby('ticker')[target].diff()
     return df
 
 

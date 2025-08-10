@@ -290,10 +290,6 @@ def treinar_sarimax_por_acao_com_exog(df: pd.DataFrame, coluna_acao: str, coluna
     
     return modelos_sarimax
 
-
-
-
-
 def criar_pipeline(preprocessor, modelo_final):
     """
     Cria um pipeline completo com pré-processador e modelo final.
