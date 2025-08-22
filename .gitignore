@@ -1,6 +1,8 @@
 /.env
-/build_lambda_cotacao_diaria.sh
-/lambda_cotacao_diaria
 /credentials
-/steps_projeto
 /.venv
+/glue-env
+/*.zip
+/data
+glue-env
+glue-libs.zip

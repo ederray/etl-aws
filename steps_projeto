@@ -10,7 +10,7 @@
 # s3: persistência dos dados de previsao na pasta predicted
 # athena: análise dos dados transformados e dados previstos --AQUI
 # cloudwatch: monitoramento do modelo: outliers ou variações
-# step functions: ligar as etapas do processo.
+# step functions: ligar as etapas do processo. -- FORA
 
 # arquitetura do projeto -- REFINAR
 # video ok
@@ -23,7 +23,7 @@
 # glue: transformação dos dados. ok
 # s3: persistência. ok
 # step functions: orquestração das etapas FORA
-# athena: consulta, entendimento e hipóteses dos dados 
+# athena: consulta, entendimento e hipóteses dos dados  ok
 
 # EXTRAS:
 # inserir logging,  ok

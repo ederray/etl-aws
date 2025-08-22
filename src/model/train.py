@@ -368,3 +368,5 @@ def gerar_metricas(y_true, y_pred):
     print(f"R2 Score: {r2:.4f}")
 
 
+def ajustar_hiper_parametros():
+    pass
