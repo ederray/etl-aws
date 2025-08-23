@@ -182,11 +182,11 @@ def grafico_pacf_interativo(df: pd.DataFrame, max_lags: int, coluna_valor: str =
         coluna_valor (str): Nome da coluna numérica.
         metodo (str): Método do PACF ('ywm' por padrão).
     """
-    tickers = sorted(df['ticker'].dropna().unique())
+    tickers = sorted(df['acao'].dropna().unique())
 
     dropdown = Dropdown(
         options=tickers,
-        description='Ticker:',
+        description='Ação:',
         layout={'width': '300px'}
     )
 
@@ -195,7 +195,7 @@ def grafico_pacf_interativo(df: pd.DataFrame, max_lags: int, coluna_valor: str =
     def atualizar_pacf(change):
         output.clear_output(wait=True)
         ticker = change['new']
-        serie = df[df['ticker'] == ticker][coluna_valor].dropna()
+        serie = df[df['acao'] == ticker][coluna_valor].dropna()
 
         with output:
             if serie.empty:
@@ -255,7 +255,7 @@ def testar_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close
     display(resultado_html)
 
 
-def grafico_correlacao(corr)
+def grafico_correlacao(corr):
     # transforma os valores em uma matriz booleana para indicar presença dos dados
     mask =  np.triu(np.ones_like(corr, dtype=bool))
     cmap = sns.diverging_palette(220, 10, as_cmap=True) 
