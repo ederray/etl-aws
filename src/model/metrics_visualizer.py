@@ -529,8 +529,6 @@ def grafico_arvore_decisao(model, X_df):
     # plot_tree(model.estimators_[0], feature_names=X_df.columns, filled=True, rounded=True)
     plt.show()
 
-
-
 def grafico_residuos_ao_longo_do_tempo_interativo(df: DataFrame):
     """
     Plota os resíduos de um modelo ao longo do tempo para uma ação selecionada,
