@@ -15,6 +15,18 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 
 # instância do objeto logger
 logger = logging.getLogger(__name__)
+
+def boxplot_analise_descritiva(df: DataFrame, distribuicao: list[float]) -> plt.Figure:
+    """Constroi um gráfico combinado de histograma das features presentes na análise descritiva."""
+    
+    try:
+        logger.info("Histograma unificado.")
+        return df.describe(percentiles=distribuicao).boxplot(figsize=(10,4))
+
+    except Exception as e:
+        logger.error(e)
+
+
 def boxplot_analise_descritiva_categorica(df: pd.DataFrame, distribuicao: list[float], feature: str):
     """
     Exibe um boxplot das features numéricas para cada valor selecionado de uma feature categórica.

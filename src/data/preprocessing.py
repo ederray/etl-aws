@@ -46,139 +46,6 @@ def agrupar_dados(df: DataFrame, cols_agrup: list, cols_filter: list=None, agr=N
     return df
 
 
-
-def boxplot_analise_descritiva(df: DataFrame, distribuicao: list[float]) -> plt.Figure:
-    """onstroi um gráfico combinado de histograma das features presentes na análise descritiva."""
-    
-    try:
-        logger.info("Histograma unificado.")
-        return df.describe(percentiles=distribuicao).boxplot(figsize=(10,4))
-
-    except Exception as e:
-        logger.error(e)
-
-
-def tratamento_nulo_dados_setor_industria(df: pd.DataFrame, colunas: list[str]) -> pd.DataFrame:
-    """
-    Aplica interpolação em cascata (Indústria -> Setor -> Geral) para preencher valores nulos
-    em colunas numéricas, ideal para a camada Refined de um pipeline de dados financeiros.
-
-    Args:
-        df (pd.DataFrame): DataFrame com colunas 'ticker', 'setor', 'industria' e colunas numéricas.
-                           O índice deve ser do tipo DatetimeIndex ordenado.
-        colunas (list[str]): Lista de nomes das colunas numéricas a interpolar.
-
-    Returns:
-        pd.DataFrame: DataFrame com os valores nulos preenchidos.
-    """
-    df_transf = df.copy()
-
-    try:
-        logger.info("Iniciando a preparação do dataset para interpolação.")
-
-        if not isinstance(df_transf.index, pd.DatetimeIndex):
-            raise ValueError("O índice do DataFrame deve ser um DatetimeIndex para interpolação temporal.")
-
-        df_transf = df_transf.reset_index().sort_values(by=['ticker', 'Date']).set_index('Date')
-
-
-        empresas_por_industria = (
-            df_transf.groupby(['setor', 'industria'])['ticker']
-            .nunique()
-            .reset_index(name='count_ticker_industria')
-        )
-        empresas_por_setor = (
-            df_transf.groupby('setor')['ticker']
-            .nunique()
-            .reset_index(name='count_ticker_setor')
-        )
-        industrias_por_setor = (
-            df_transf.groupby('setor')['industria']
-            .nunique()
-            .reset_index(name='count_industria_setor')
-        )
-
-        # reset de index para preservação da feature de data
-        df_transf = df_transf.reset_index()
-
-        df_transf = df_transf.merge(empresas_por_industria, on=['setor', 'industria'], how='left')
-        df_transf = df_transf.merge(empresas_por_setor, on='setor', how='left')
-        df_transf = df_transf.merge(industrias_por_setor, on='setor', how='left')
-
-        logger.info("Contagens por setor e indústria adicionadas ao DataFrame.")
-
-    except Exception as e:
-        logger.error(f"Erro na fase de preparação: {e}")
-        raise
-
-    try:
-        for coluna in colunas:
-            logger.info(f"Processando coluna: {coluna}")
-
-            # Preenchimento inicial
-            df_transf[coluna] = df_transf.groupby('ticker')[coluna].ffill()
-
-            # Regra 1: Interpolação por indústria
-            cond_industria = df_transf['count_ticker_industria'] > 1
-            df_ind = df_transf[cond_industria].copy()
-            df_ind_interp = (
-                df_ind.groupby(['setor', 'industria'])[coluna]
-                .apply(lambda x: x.sort_index().interpolate(method='polynomial', order=2))
-                .reset_index(level=[0, 1], drop=True)
-            )
-            df_transf.loc[df_ind_interp.index, coluna] = df_ind_interp
-
-            # Regra 2: Interpolação por setor
-            cond_setor = (
-                (df_transf['count_ticker_industria'] == 1) &
-                (df_transf['count_industria_setor'] > 1)
-            )
-            df_set = df_transf[cond_setor].copy()
-            df_set_interp = (
-                df_set.groupby('setor')[coluna]
-                .apply(lambda x: x.sort_index().interpolate(method='polynomial', order=2))
-                .reset_index(level=0, drop=True)
-            )
-            df_transf.loc[df_set_interp.index, coluna] = df_set_interp
-
-            # Regra 3: Interpolação geral
-            cond_geral = (
-                (df_transf['count_ticker_industria'] == 1) &
-                (df_transf['count_industria_setor'] == 1)
-            )
-            df_geral = df_transf[cond_geral].copy()
-            df_geral_interp = (
-                df_geral[coluna]
-                .sort_index()
-                .interpolate(method='polynomial', order=2)
-            )
-            df_transf.loc[df_geral_interp.index, coluna] = df_geral_interp
-
-        # ffill e bfill finais
-        logger.info("Aplicando ffill() e bfill() finais.")
-        for coluna in colunas:
-            df_transf[coluna] = df_transf.groupby('ticker')[coluna].ffill()
-            df_transf[coluna] = df_transf.groupby('ticker')[coluna].bfill()
-
-        # Fallback final
-        for coluna in colunas:
-            if df_transf[coluna].isna().any():
-                logger.warning(f"Ainda há NaNs em '{coluna}'. Preenchendo com a média global.")
-                media = df_transf[coluna].mean()
-                df_transf[coluna].fillna(media, inplace=True)
-
-        # filtragem das colunas construídas no processo de tratamento dos dados nulos
-        df_transf.drop(columns=['count_ticker_industria','count_ticker_setor','count_industria_setor'], inplace=True)
-        # retorno do datetimeIndex
-        df_transf = df_transf.set_index('Date')
-
-        logger.info("Preenchimento de nulos concluído com sucesso.")
-        return df_transf
-
-    except Exception as e:
-        logger.error(f"Erro durante interpolação de valores: {e}")
-        raise
-
 def dados_temporais(df: DataFrame) -> DataFrame:
     """Função que insere colunas com dados temporais a partir do index do Dataframe"""
     df['dayofweek'] = df.index.dayofweek
@@ -285,7 +152,7 @@ def testar_estacionariedade(serie, nome="Série"):
         print("⚠️ Série NÃO estacionária (não rejeita H₀)")
 
 
-def diferenciar_serie_temporal(df: pd.DataFrame, target: str) -> pd.DataFrame:
+def diferenciar_serie_temporal(df: DataFrame, target: str) -> DataFrame:
     """
     Aplica diferenciação de primeira ordem na coluna target agrupando por 'ticker'.
 

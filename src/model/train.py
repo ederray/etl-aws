@@ -53,43 +53,51 @@ def selecionar_features(df: pd.DataFrame,
     
     return features_selecionadas
 
-
-def split_data_by_date(df: pd.DataFrame, cutoff_date: str, target: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+def split_data_by_date_e_ticker(
+    df: pd.DataFrame, 
+    cutoff_date: str, 
+    target: str
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
-    Separa o DataFrame em conjuntos de treino e teste usando uma data de corte.
+    Separa o DataFrame em conjuntos de treino e teste usando uma data de corte, 
+    garantindo que não haja sobreposição de datas.
 
     Args:
-        df (pd.DataFrame): DataFrame com DatetimeIndex e dados de várias ações.
+        df (pd.DataFrame): DataFrame com a coluna 'acao' e com DatetimeIndex.
         cutoff_date (str): Data de corte no formato 'YYYY-MM-DD'.
         target (str): Nome da coluna da variável target (y).
 
     Returns:
         tuple: (X_train, X_test, y_train, y_test)
     """
-    # Certifique-se de que o índice é um DatetimeIndex e está ordenado
-    if not isinstance(df.index, pd.DatetimeIndex):
-        raise ValueError("O índice do DataFrame deve ser um DatetimeIndex.")
-    
-    df_sorted = df.sort_index()
+    # Garante que 'Date' e 'acao' estejam como colunas antes de criar o MultiIndex
+    if df.index.name == 'Date' or isinstance(df.index, pd.DatetimeIndex):
+        df = df.reset_index()
 
-    # Filtra os dados de treino
-    train_df = df_sorted.loc[df_sorted.index < cutoff_date]
+    # Cria o MultiIndex com 'acao' e 'Date'
+    df = df.set_index(['acao', 'Date']).sort_index()
+
+    # Converte o cutoff_date para o tipo de dado correto
+    cutoff_datetime = pd.to_datetime(cutoff_date)
     
-    # Filtra os dados de teste
-    test_df = df_sorted.loc[df_sorted.index >= cutoff_date]
+    # Separa os dados com o MultiIndex, garantindo que o cutoff_date pertença
+    # apenas ao conjunto de teste.
+    train_df = df.loc[(slice(None), slice(None, cutoff_datetime - pd.Timedelta(days=1))), :]
+    test_df = df.loc[(slice(None), slice(cutoff_datetime, None)), :]
     
-    # Separa X e y para treino
+    # Separa X e y
     X_train = train_df.drop(columns=[target])
     y_train = train_df[target]
     
-    # Separa X e y para teste
     X_test = test_df.drop(columns=[target])
     y_test = test_df[target]
-    
-    print(f"Dados de treino: {train_df.index.min().date()} a {train_df.index.max().date()}")
-    print(f"Dados de teste: {test_df.index.min().date()} a {test_df.index.max().date()}")
+
+    print(f"Dados de treino: {y_train.index.get_level_values('Date').min().date()} a {y_train.index.get_level_values('Date').max().date()}")
+    print(f"Dados de teste: {y_test.index.get_level_values('Date').min().date()} a {y_test.index.get_level_values('Date').max().date()}")
     
     return X_train, X_test, y_train, y_test
+
+
 
 def separar_dados_treino_teste_loc_acao(df: pd.DataFrame,target: str,coluna_acao: str,dias_treino: int = 6,dias_teste: int = 3) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
