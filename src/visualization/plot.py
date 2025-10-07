@@ -136,6 +136,59 @@ def grafico_acf(coluna_target:Series, n_lag:int):
     plot_acf(coluna_target, lags=n_lag, title=f'Autocorrelação de {n_lag}lags') 
     return plt.show()
 
+def grafico_decomposicao_temporal_interativo(df: pd.DataFrame, target: str, period: int = 7):
+    """
+    Cria um gráfico de decomposição temporal interativo, selecionando o ticker.
+
+    Args:
+        df (pd.DataFrame): DataFrame contendo a série temporal com índice de datas.
+        target (str): Nome da coluna de valores (por exemplo, 'Close').
+        period (int): Período para decomposição sazonal (ex: 7 dias, 12 meses, etc).
+    """
+
+    tickers = sorted(df['ticker'].dropna().unique())
+    
+    dropdown = Dropdown(
+        options=tickers,
+        description='Ticker:',
+        layout={'width': '300px'}
+    )
+
+    output = Output()
+
+    def atualizar_grafico(change):
+        output.clear_output(wait=True)
+
+        ticker = change['new']
+        serie = df[df['ticker'] == ticker].sort_index()
+
+        with output:
+            if serie.empty:
+                print(f"Nenhum dado encontrado para {ticker}")
+                return
+            
+            if target not in serie.columns:
+                print(f"Coluna {target} não encontrada.")
+                return
+
+            try:
+                resultado = seasonal_decompose(serie[target], model='additive', period=period)
+                fig = resultado.plot()
+                fig.suptitle(f'Decomposição Temporal: {ticker}', fontsize=14)
+                fig.tight_layout()
+                plt.show()
+                plt.close(fig)
+
+            except Exception as e:
+                print(f"Erro na decomposição: {e}")
+
+    # Conecta o dropdown ao handler
+    dropdown.observe(atualizar_grafico, names='value')
+
+    # Força render inicial com o primeiro ticker
+    dropdown.value = tickers[0]
+
+    display(VBox([dropdown, output]))
 
 def grafico_pacf(coluna_target:Series, n_lag:int, metodo:str='ywm'):
     """Função para gerar o gráfico de autocorrelação parcial."""

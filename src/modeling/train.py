@@ -53,16 +53,13 @@ def selecionar_features(df: pd.DataFrame,
     
     return features_selecionadas
 
-def split_data_by_date_e_ticker(
-    df: pd.DataFrame, 
-    cutoff_date: str, 
-    target: str
+def split_dados_periodo_acao(df: pd.DataFrame, cutoff_date: str, target: str
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     Separa o DataFrame em conjuntos de treino e teste usando uma data de corte, 
     garantindo que não haja sobreposição de datas.
 
-    Args:
+    params:
         df (pd.DataFrame): DataFrame com a coluna 'acao' e com DatetimeIndex.
         cutoff_date (str): Data de corte no formato 'YYYY-MM-DD'.
         target (str): Nome da coluna da variável target (y).
@@ -92,8 +89,8 @@ def split_data_by_date_e_ticker(
     X_test = test_df.drop(columns=[target])
     y_test = test_df[target]
 
-    print(f"Dados de treino: {y_train.index.get_level_values('Date').min().date()} a {y_train.index.get_level_values('Date').max().date()}")
-    print(f"Dados de teste: {y_test.index.get_level_values('Date').min().date()} a {y_test.index.get_level_values('Date').max().date()}")
+    logger.info(f"\nDados de treino:{y_train.index.get_level_values('Date').min().date()} a {y_train.index.get_level_values('Date').max().date()}\nDados de teste:{y_test.index.get_level_values('Date').min().date()} a {y_test.index.get_level_values('Date').max().date()}")
+    logger.info(f"\nShape X_treino:{X_train.shape}\nShape y_treino{y_train.shape}\nShape X_teste:{X_test.shape}\nShape y_teste{y_test.shape}\n")
     
     return X_train, X_test, y_train, y_test
 
@@ -374,7 +371,3 @@ def gerar_metricas(y_true, y_pred):
     print(f"MAE: {mae:.4f}")
     print(f"RMSE: {rmse:.4f}")
     print(f"R2 Score: {r2:.4f}")
-
-
-def ajustar_hiper_parametros():
-    pass

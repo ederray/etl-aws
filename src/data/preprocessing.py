@@ -7,16 +7,14 @@ import numpy as np
 from pandas import DataFrame, Series
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, PowerTransformer
-from statsmodels.tsa.stattools import adfuller
+
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 # instância do objeto logger
 logger = logging.getLogger(__name__)
 
-def amostra_dados(df: DataFrame) -> DataFrame:
-    """Função para retornar a amostragem dos dados"""
-    return df.sample(3)
+
 
 
 def remover_duplicados(df: DataFrame, coluna: str) -> DataFrame:
@@ -57,7 +55,6 @@ def dados_temporais(df: DataFrame) -> DataFrame:
 
     return df
 
-
 def transformacao_ciclica(df: DataFrame, dias_uteis:bool=False) -> DataFrame:
     """Transformação cíclica"""
     
@@ -80,77 +77,6 @@ def transformacao_ciclica(df: DataFrame, dias_uteis:bool=False) -> DataFrame:
     except Exception as e:
         logger.error(e)
     return df
-
-def grafico_decomposicao_temporal_interativo(df: pd.DataFrame, target: str, period: int = 7):
-    """
-    Cria um gráfico de decomposição temporal interativo, selecionando o ticker.
-
-    Args:
-        df (pd.DataFrame): DataFrame contendo a série temporal com índice de datas.
-        target (str): Nome da coluna de valores (por exemplo, 'Close').
-        period (int): Período para decomposição sazonal (ex: 7 dias, 12 meses, etc).
-    """
-
-    tickers = sorted(df['ticker'].dropna().unique())
-    
-    dropdown = Dropdown(
-        options=tickers,
-        description='Ticker:',
-        layout={'width': '300px'}
-    )
-
-    output = Output()
-
-    def atualizar_grafico(change):
-        output.clear_output(wait=True)
-
-        ticker = change['new']
-        serie = df[df['ticker'] == ticker].sort_index()
-
-        with output:
-            if serie.empty:
-                print(f"Nenhum dado encontrado para {ticker}")
-                return
-            
-            if target not in serie.columns:
-                print(f"Coluna {target} não encontrada.")
-                return
-
-            try:
-                resultado = seasonal_decompose(serie[target], model='additive', period=period)
-                fig = resultado.plot()
-                fig.suptitle(f'Decomposição Temporal: {ticker}', fontsize=14)
-                fig.tight_layout()
-                plt.show()
-                plt.close(fig)
-
-            except Exception as e:
-                print(f"Erro na decomposição: {e}")
-
-    # Conecta o dropdown ao handler
-    dropdown.observe(atualizar_grafico, names='value')
-
-    # Força render inicial com o primeiro ticker
-    dropdown.value = tickers[0]
-
-    display(VBox([dropdown, output]))
-
-
-
-def testar_estacionariedade(serie, nome="Série"):
-    """Função para análise de estacionriedade da série de dados"""
-    resultado = adfuller(serie.dropna())
-    print(f"\n🔍 Teste ADF - {nome}")
-    print(f"ADF Statistic: {resultado[0]:.4f}")
-    print(f"p-value: {resultado[1]:.4f}")
-    for k, v in resultado[4].items():
-        print(f"Critério {k}%: {v:.4f}")
-    
-    if resultado[1] < 0.05:
-        print("✅ Série estacionária (rejeita H₀)")
-    else:
-        print("⚠️ Série NÃO estacionária (não rejeita H₀)")
-
 
 def diferenciar_serie_temporal(df: DataFrame, target: str) -> DataFrame:
     """
