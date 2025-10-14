@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import learning_curve, TimeSeriesSplit
 from statsmodels.stats.diagnostic import acorr_ljungbox
+from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from ipywidgets import Dropdown, VBox, Output
+from ipywidgets import Dropdown, VBox, Output, interact, HTML
+from statsmodels.tsa.stattools import adfuller
 from IPython.display import display
 from typing import Any, List
 
@@ -24,7 +26,7 @@ def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
     Executa o teste de Ljung-Box interativamente para os resíduos (y_real - y_pred) por ticker.
     Este teste verifica se os resíduos são ruído branco (sem autocorrelação).
     """
-    # Verifica se as colunas necessárias existem
+  
     if 'acao' not in df.columns or 'y_real' not in df.columns or 'y_pred' not in df.columns:
         print("Erro: O DataFrame deve conter as colunas 'acao', 'y_real' e 'y_pred'.")
         return
@@ -41,7 +43,7 @@ def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
     def atualizar_teste(change):
         output.clear_output(wait=True)
         ticker = change['new']
-        # Filtra a ação e calcula os resíduos
+      
         df_acao = df[df['acao'] == ticker].dropna(subset=['y_real', 'y_pred'])
         residuos = df_acao['y_real'] - df_acao['y_pred']
 
@@ -50,7 +52,7 @@ def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
                 print(f"Nenhuma série de resíduos disponível para {ticker}")
                 return
             
-            # Executa o teste de Ljung-Box
+      
             ljung_box = acorr_ljungbox(residuos, lags=lags, return_df=True)
             ljung_box["Rejeita_H0"] = ljung_box["lb_pvalue"] < alpha
             
@@ -58,7 +60,6 @@ def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
             display(ljung_box)
             print("---")
             
-            # Interpretação do resultado no último lag
             p_value_geral = ljung_box.iloc[-1]["lb_pvalue"]
             if p_value_geral > alpha:
                 print(f"O p-valor ({p_value_geral:.4f}) é maior que {alpha}. Não há autocorrelação significativa (indicativo de bom modelo).")
@@ -67,29 +68,63 @@ def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
     
     dropdown.observe(atualizar_teste, names='value')
     
-    # Força a execução inicial para o primeiro ticker
     if tickers:
         dropdown.value = tickers[0] 
         display(VBox([dropdown, output]))
 
-def grafico_acf(df: DataFrame, max_lags: int, coluna_valor: str):
+def grafico_acf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'close'):
     """
     Gera gráfico de autocorrelação (ACF) para uma série temporal, interativamente por ticker.
-    Usado para identificar a ordem do componente MA (média móvel) ou a sazonalidade.
 
     Args:
-        df (pd.DataFrame): DataFrame com colunas 'acao' e a coluna numérica de interesse.
+        df (pd.DataFrame): DataFrame com colunas 'ticker' e a coluna numérica de interesse.
         max_lags (int): Número máximo de lags para o gráfico.
-        coluna_valor (str): Nome da coluna numérica (ex: 'close', 'y_pred' ou 'resíduos').
+        coluna_valor (str): Nome da coluna numérica (ex: 'close', 'trailingPE', etc.).
     """
-    if 'acao' not in df.columns or coluna_valor not in df.columns:
-        print(f"Erro: O DataFrame deve conter a coluna 'acao' e a coluna de valor '{coluna_valor}'.")
-        return
+    tickers = sorted(df['ticker'].dropna().unique())
 
+    dropdown = Dropdown(
+        options=tickers,
+        description='Ticker:',
+        layout={'width': '300px'}
+    )
+
+    output = Output()
+
+    def atualizar_acf(change):
+        output.clear_output(wait=True)
+        ticker = change['new']
+
+        serie = df[df['ticker'] == ticker][coluna_valor].dropna()
+
+        with output:
+            if serie.empty:
+                print(f"Nenhuma série disponível para {ticker}")
+                return
+
+            plt.figure(figsize=(10, 4))
+            plot_acf(serie, lags=max_lags)
+            plt.title(f'ACF - {coluna_valor} | Ticker: {ticker}')
+            plt.tight_layout()
+            plt.show()
+            plt.close()  # <- fecha a figura para evitar acumulação
+
+    dropdown.observe(atualizar_acf, names='value')
+    dropdown.value = tickers[0]  # força exibição inicial
+
+    display(VBox([dropdown, output]))
+
+def grafico_pacf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'close', metodo: str = 'ywm'):
+    """
+    Gera gráfico de autocorrelação parcial (PACF) interativo por ticker.
+
+    Args:
+        df (pd.DataFrame): DataFrame com colunas 'ticker' e a coluna numérica.
+        max_lags (int): Número máximo de lags.
+        coluna_valor (str): Nome da coluna numérica.
+        metodo (str): Método do PACF ('ywm' por padrão).
+    """
     tickers = sorted(df['acao'].dropna().unique())
-    if not tickers:
-        print("Erro: Nenhuma ação válida encontrada na coluna 'acao'.")
-        return
 
     dropdown = Dropdown(
         options=tickers,
@@ -99,89 +134,67 @@ def grafico_acf(df: DataFrame, max_lags: int, coluna_valor: str):
 
     output = Output()
 
-    def atualizar_acf(change):
-        output.clear_output(wait=True)
-        acao = change['new']
-
-        serie = df[df['acao'] == acao][coluna_valor].dropna()
-
-        with output:
-            if serie.empty:
-                print(f"Nenhuma série disponível para {acao}")
-                return
-
-            plt.figure(figsize=(10, 4))
-            plot_acf(serie, lags=max_lags, title=f'ACF - {coluna_valor} | Ação: {acao}')
-            plt.tight_layout()
-            plt.show()
-            plt.close() 
-
-    dropdown.observe(atualizar_acf, names='value')
-    
-    # Força a execução inicial
-    if tickers:
-        dropdown.value = tickers[0]  
-        display(VBox([dropdown, output]))
-
-
-def grafico_pacf(df: DataFrame, max_lags: int, coluna_valor: str, metodo: str = 'ywm'):
-    """
-    Gera gráfico de autocorrelação parcial (PACF) interativo por ticker.
-    Usado para identificar a ordem do componente AR (auto-regressivo).
-
-    Args:
-        df (pd.DataFrame): DataFrame com colunas 'acao' e a coluna numérica.
-        max_lags (int): Número máximo de lags.
-        coluna_valor (str): Nome da coluna numérica.
-        metodo (str): Método do PACF ('ywm' por padrão, para evitar warnings de séries curtas).
-    """
-    if 'acao' not in df.columns or coluna_valor not in df.columns:
-        print(f"Erro: O DataFrame deve conter a coluna 'acao' e a coluna de valor '{coluna_valor}'.")
-        return
-
-    acoes = sorted(df['acao'].dropna().unique())
-    if not acoes:
-        print("Erro: Nenhuma ação válida encontrada na coluna 'acao'.")
-        return
-
-    dropdown = Dropdown(
-        options=acoes,
-        description='Ação:',
-        layout={'width': '300px'}
-    )
-
-    output = Output()
-
     def atualizar_pacf(change):
         output.clear_output(wait=True)
-        acao = change['new']
-        serie = df[df['acao'] == acao][coluna_valor].dropna()
+        ticker = change['new']
+        serie = df[df['acao'] == ticker][coluna_valor].dropna()
 
         with output:
             if serie.empty:
-                print(f"Nenhuma série disponível para {acao}")
+                print(f"Nenhuma série disponível para {ticker}")
                 return
 
-            # Ajuste de Lags (melhora a robustez em séries curtas)
-            limite = len(serie) // 2 - 1
+            limite = len(serie) // 2
             lags_ajustado = min(max_lags, limite)
             if lags_ajustado < max_lags:
-                print(f"[Atenção] Série curta. Reduzindo lags de {max_lags} para {lags_ajustado}.")
-                
-            if lags_ajustado <= 0:
-                 print("Não foi possível calcular o PACF. A série é muito curta ou vazia.")
-                 return
+                print(f"[Atenção] Série muito curta. Reduzindo lags de {max_lags} para {lags_ajustado}.")
 
             plt.figure(figsize=(10, 4))
-            plot_pacf(serie, lags=lags_ajustado, method=metodo, title=f'PACF - {coluna_valor} | Ação: {acao}')
+            plot_pacf(serie, lags=lags_ajustado, method=metodo)
+            plt.title(f'PACF - {coluna_valor} | Ticker: {ticker}')
             plt.tight_layout()
             plt.show()
             plt.close()
 
     dropdown.observe(atualizar_pacf, names='value')
+    dropdown.value = tickers[0]  # força execução inicial
+
+    display(VBox([dropdown, output]))
+
+
+
+def teste_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close'):
+    """
+    Interface interativa para testar estacionariedade de uma série temporal por ticker.
+    """
+    tickers = sorted(df['ticker'].dropna().unique())
     
-    # Força a execução inicial
-    if acoes:
-        dropdown.value = acoes[0]
-        display(VBox([dropdown, output]))
+    # Cria um widget HTML vazio para exibir o resultado
+    resultado_html = HTML()
+
+    def analisar(ticker):
+        serie = df[df['ticker'] == ticker][coluna_valor]
+        resultado = adfuller(serie.dropna())
+
+        # Constrói o texto do resultado como uma string formatada
+        resultado_string = f"""
+        <p>🔍 <strong>Teste ADF - {coluna_valor} | Ticker: {ticker}</strong></p>
+        <ul>
+            <li>ADF Statistic: {resultado[0]:.4f}</li>
+            <li>p-value: {resultado[1]:.4f}</li>
+        """
+        for k, v in resultado[4].items():
+            resultado_string += f"<li>Critério {k}%: {v:.4f}</li>"
+        
+        if resultado[1] < 0.05:
+            resultado_string += "</ul><p>✅ Série estacionária (rejeita H₀)</p>"
+        else:
+            resultado_string += "</ul><p>⚠️ Série NÃO estacionária (não rejeita H₀)</p>"
+
+        # Atualiza o conteúdo do widget HTML
+        resultado_html.value = resultado_string
+
+    # Exibe o widget interativo e o widget HTML
+    interact(analisar, ticker=tickers)
+    display(resultado_html)
 
