@@ -12,6 +12,7 @@ from ipywidgets import interact
 from pandas import DataFrame, Series
 from scipy import stats
 from sklearn.preprocessing import scale
+from statsmodels.tsa.seasonal import seasonal_decompose
 import math
 sns.set_style("darkgrid")
 
@@ -346,5 +347,61 @@ def grafico_lineplot(
                         titulo=f"{titulo or 'Série temporal'} | {cat_col}: {filtro}",
                         path=None
                     )
+    except Exception as e:
+        print(f"Erro: {e}")
+
+
+
+def grafico_pairplot_target(
+    df: DataFrame,
+    target: str,
+    lista_features: list[str],
+    interativo: bool = False,
+    cat_col: str = None,
+    path: str = None,
+    tipo: str = "scatter",
+) -> None:
+    
+    try:
+
+        def _plot_pairplot(df_plot, target, x_vars, kind, titulo):
+            ax = sns.pairplot(data=df_plot, y_vars=[target], x_vars=x_vars, kind=kind)
+            ax.figure.suptitle(titulo, y=1.05)
+            ax.figure.set_size_inches(20, 2)
+            plt.show()
+            
+            if path:
+                try:
+                    ax.figure.savefig(path, bbox_inches='tight')
+                except Exception as e:
+                    print(f"Erro ao salvar: {e}")
+            
+            plt.close()
+
+        if interativo:
+            
+            opcoes = sorted(df[cat_col].dropna().unique().tolist())
+            @interact(filtro=opcoes)
+            def plot_interativo(filtro):
+                df_serie = df[df[cat_col] == filtro]
+                
+                _plot_pairplot(
+                    df_serie,
+                    target, 
+                    lista_features, 
+                    tipo,
+                    titulo=f"Pairplot ({filtro}): {target} vs. Features"
+                )
+                return
+
+        else:
+            _plot_pairplot(
+                df, 
+                target, 
+                lista_features, 
+                tipo,
+                titulo="Pairplot Estático (Todas as Features)"
+            )
+
     except Exception as e:
         print(f"Erro: {e}")

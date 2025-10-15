@@ -263,13 +263,6 @@ def gerar_previsao_valores(df: DataFrame):
     dropdown.observe(atualizar_grafico, names='value')
     dropdown.value = tickers[0]
     display(VBox([dropdown, output]))
-
-
-
-
-
-
-
  
 
 def grafico_residuos_ao_longo_do_tempo(df: DataFrame):

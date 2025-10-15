@@ -4,8 +4,6 @@ import numpy as np
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.model_selection import learning_curve, TimeSeriesSplit
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
@@ -18,8 +16,7 @@ from typing import Any, List
 logger = logging.getLogger(__name__)
 
 
-from ipywidgets import Dropdown, VBox, Output
-from IPython.display import display
+
 
 def teste_ljung_box(df: DataFrame, lags=20, alpha=0.05):
     """
@@ -107,10 +104,10 @@ def grafico_acf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'cl
             plt.title(f'ACF - {coluna_valor} | Ticker: {ticker}')
             plt.tight_layout()
             plt.show()
-            plt.close()  # <- fecha a figura para evitar acumulação
+            plt.close()
 
     dropdown.observe(atualizar_acf, names='value')
-    dropdown.value = tickers[0]  # força exibição inicial
+    dropdown.value = tickers[0]
 
     display(VBox([dropdown, output]))
 
@@ -124,7 +121,7 @@ def grafico_pacf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'c
         coluna_valor (str): Nome da coluna numérica.
         metodo (str): Método do PACF ('ywm' por padrão).
     """
-    tickers = sorted(df['acao'].dropna().unique())
+    tickers = sorted(df['ticker'].dropna().unique())
 
     dropdown = Dropdown(
         options=tickers,
@@ -137,7 +134,7 @@ def grafico_pacf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'c
     def atualizar_pacf(change):
         output.clear_output(wait=True)
         ticker = change['new']
-        serie = df[df['acao'] == ticker][coluna_valor].dropna()
+        serie = df[df['ticker'] == ticker][coluna_valor].dropna()
 
         with output:
             if serie.empty:
@@ -157,7 +154,7 @@ def grafico_pacf_interativo(df: DataFrame, max_lags: int, coluna_valor: str = 'c
             plt.close()
 
     dropdown.observe(atualizar_pacf, names='value')
-    dropdown.value = tickers[0]  # força execução inicial
+    dropdown.value = tickers[0] 
 
     display(VBox([dropdown, output]))
 
@@ -169,14 +166,12 @@ def teste_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close'
     """
     tickers = sorted(df['ticker'].dropna().unique())
     
-    # Cria um widget HTML vazio para exibir o resultado
     resultado_html = HTML()
 
     def analisar(ticker):
         serie = df[df['ticker'] == ticker][coluna_valor]
         resultado = adfuller(serie.dropna())
 
-        # Constrói o texto do resultado como uma string formatada
         resultado_string = f"""
         <p>🔍 <strong>Teste ADF - {coluna_valor} | Ticker: {ticker}</strong></p>
         <ul>
@@ -191,10 +186,56 @@ def teste_estacionariedade_interativo(df: DataFrame, coluna_valor: str = 'close'
         else:
             resultado_string += "</ul><p>⚠️ Série NÃO estacionária (não rejeita H₀)</p>"
 
-        # Atualiza o conteúdo do widget HTML
         resultado_html.value = resultado_string
 
-    # Exibe o widget interativo e o widget HTML
     interact(analisar, ticker=tickers)
     display(resultado_html)
+
+def grafico_decomposicao_temporal(
+    df: DataFrame, 
+    target: str, 
+    period: int,
+    interativo: bool = False,
+    cat_col: str = 'ticker',
+    model: str = 'additive'
+) -> None:
+    """
+    Gera gráficos de decomposição de série temporal em modo estático (série agregada) 
+    ou interativo (seleção por ticker).
+    """
+    try:
+      
+        opcoes = df[cat_col].dropna().unique().tolist()
+        
+      
+        def _plot_decomposicao(ts_serie, target, period, model, nome_serie):
+            
+            result = seasonal_decompose(ts_serie, model=model, period=period)
+
+            fig = result.plot()
+            
+            fig.suptitle(f"Decomposição Temporal: {target} de {nome_serie}", fontsize=16, y=1.02)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            plt.show()
+            plt.close() 
+
+   
+        if interativo:
+                 
+            @interact(filtro=sorted(opcoes))
+            def plot_interativo(filtro):
+                df_serie = df[df[cat_col] == filtro]
+                ts_serie = df_serie[target].dropna()
+                _plot_decomposicao(ts_serie, target, period, model, filtro)
+                return 
+
+    
+        else:
+            
+            nome_serie = "Série Agregada"
+            ts_geral = df.groupby(df.index)[target].mean().dropna() 
+            _plot_decomposicao(ts_geral, target, period, model, nome_serie)
+    
+    except Exception as e:
+        print(f"Erro no gráfico de decomposição: {e}")
 

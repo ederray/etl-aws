@@ -125,8 +125,6 @@ def gerar_features_temporais(df: pd.DataFrame,
 
     return df
 
-
-# novas features técnicas
 def calcular_rsi(df, window=14):
     delta = df['Close'].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
