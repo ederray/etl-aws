@@ -94,8 +94,8 @@ def diferenciar_serie_temporal(df: DataFrame, target: str) -> DataFrame:
 
 def gerar_features_temporais(df: pd.DataFrame, 
                               coluna_valor: str,
-                              lags: list = [1,3,5,7,15,30,60,90],
-                              janelas_rolling: list = [3,5,7,15,30,60,90],
+                              lags: list = [1,3,5,7,15,30,60,90,120,180,360],
+                              janelas_rolling: list = [3,5,7,15,30,60,90,120,180,360],
                               grupo: str = 'ticker') -> pd.DataFrame:
     """
     Gera lags, médias móveis e volatilidades para séries temporais diferenciadas.
