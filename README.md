@@ -1,213 +1,182 @@
-# Tech Challenge ML Engineer - Fase 2 - ETL na AWS
-
-This project was developed as part of the Phase 3 Tech Challenge, focusing on Order Cycle Time (OCT) prediction using Amazon Delivery data.<br>
-O projeto $\text{etl\_na\_aws}$ implementa uma arquitetura ETL (Extract, Transform, Load) e um fluxo de MLOps completamente serverless na Amazon Web Services (AWS). 
-
-## 🚀 Application and Experiment Tracking
-
-Access the live application and the full history of model experiments using the links below.
-
-| **Tool**                   | **Status**     | **Link** |
-|-----------------------------|----------------|-----------|
-| Active Forecasting App      | 🟢 Deployed     | [Open App](https://example.com) |
-| MLflow Experiment Tracking  | 📊 Monitoring   | [View Dashboard](https://dagshub.com/projeto5mlet/amazon_last_mile_delivery.mlflow) |
-
-## 🏗️ Project Architecture
-The architecture illustrates the data flow from raw ingestion, through feature engineering and model training, to the final deployment and tracking services.
-
-![Architecture](reports/Arquitetura_ETL_na_AWS.png)
+# ETL na AWS  — Tech Challenge ML Engineer Fase 2  
 
 
-## 🎯 Project Objective
+Este projeto foi desenvolvido como parte do **Tech Challenge**, com foco na construção de um **pipeline ETL automatizado** para as ações da **Carteira Ibovespa**, incluindo a captura de dados via **API YFinance**, etapas de **limpeza e transformação**, e o consumo de dados na **Amazon Web Services (AWS)**.
 
-- **OTD Prediction** = The total time elapsed from the moment in which the order is input into the system until its final delivery at the customer's location in minutes.<br>
-This prediction is crucial for ensuring the deliveries meet the minimum Service Level Agreement (SLA) of 120 minutes, thereby directly impacting customer satisfaction and logistics efficiency.
+Com base nesse pipeline, foi implementada uma **arquitetura MLOps serverless**, projetada para **prever o preço de fechamento futuro das ações** ($\text{Close}_{t+1}$), utilizando técnicas de **Machine Learning aplicadas a séries temporais financeiras**.
 
+O projeto combina **engenharia de dados, automação em nuvem e modelagem preditiva**, garantindo **escalabilidade, rastreabilidade de experimentos e reprodutibilidade completa do pipeline**.
 
+---
 
-## 📊 Dataset and Simulation
+## 🏗️ Arquitetura do Projeto
 
-The **Amazon Delivery Dataset** provides a comprehensive view of last-mile logistics operations, including:
-- **43,632 deliveries** across multiple cities
-- Order details and delivery agents information
-- Weather and traffic conditions
-- Delivery performance metrics
+![Arquitetura do Projeto](reports\Arquitetura_ETL_na_AWS.png)
 
-We also utilized Simpy for discrete-event simulation to model and analyze various scenarios related to delivery performance.
+---
 
-## 📁 Repository Architecture
+## 🎯 Objetivo do Projeto
+
+### Construção do Pipeline e Previsão de Preço ($\text{Close}_{t+1}$) 
+
+O objetivo é construir um pipeline robusto de captura do preço das ações da carteira Ibovespa e prever o **preço de fechamento do próximo dia** com base em dados técnicos e contextuais.
+
+* **Regressão (Nível):** minimizar o Erro Absoluto Médio (MAE), alcançando **MAE ≈ 0.81**.
+---
+
+## 📊 Dataset e Features
+
+O dataset fornece uma visão abrangente do **mercado de capitais brasileiro (B3)**, incluindo:
+
+* **Preços Históricos:** Abertura, Fechamento, Máxima, Mínima, Volume.
+* **Contexto:** Setor, Indústria e Tipo de Ativo.
+* **Features de Momentum:** Indicadores técnicos como **MACD** e **RSI**.
+* **Features de Nível e Variação:** Lags e variações acumuladas (`lag_1_Close`, `lag_30_Close`, `lag_X_close_diff`).
+
+---
+
+## 📁 Estrutura do Repositório
 
 ```
-├── data/                       # Raw and processed data
-│   ├── raw/                    # Original data from Kaggle
-│   └── processed/              # Cleaned and transformed data
-│   └── simulation/             # Simulation results
-├── notebooks/                  # Notebooks
-│   ├── 02_EDA                  # Exploratory Data Analysis (EDA)
-│   ├── 02_MODEL_VALIDATION     # ML Process Analysis
-│   └── 02_SIMULATION.ipynb     # Simulation Data Analysis
-├── reports/                    # Reports and figures
-│   ├── figures/models/         # Images Plots from Model Validation
-├── src/                        # Project source code
-│   ├── config/                 # Configuration files
-│   ├── data/                   # Processing modules
-│   ├── features/               # Feature Engineering modules
-│   ├── modeling/               # ML training modules
-│   ├── models/                 # Models files
-│   ├── utils/                  # Utilities modules
-│   └── visualization/          # Visualizations
-├── tests/                      # Project tests
-├── app.py                      # Streamlit app
-├── otd_simulator.py            # Simpy script
-├── project.toml                # Poetry config files
-└── requirements.txt            # Requirements
+├── data/                       
+│   ├── raw/                    # Dados brutos (B3)
+│   └── processed/              # Dados com Feature Engineering (MACD, RSI, Lags)
+├── notebooks/                  
+│   ├── 02_EDA                  # Análise Exploratória de Dados (EDA)
+│   └── 02_MODEL_VALIDATION     # Validação e Análises Gráficas
+├── reports/                    
+│   └── figures/models/         # Plots e gráficos (Curvas, SHAP)
+├── src/                        
+│   ├── config/                 # Configurações do projeto
+│   ├── data/                   # Processamento e ETL
+│   ├── features/               # Cálculo de indicadores técnicos
+│   ├── modeling/               # Treinamento e tuning de modelos
+│   ├── models/                 # Modelos serializados
+│   ├── utils/                  # Funções utilitárias
+│   └── visualization/          # Visualizações e gráficos
+├── tests/                      # Testes unitários e integração
+├── glue.py                     # Script ETL AWS Glue
+├── main.py                     # Script de automação da captura de ações
+├── project.toml                # Configuração Poetry
+└── requirements.txt            # Dependências
 ```
 
-## 🚀 Implemented Features
+---
 
-### 1. **Data Pipeline**
-- ✅ Data collection from Kaggle
-- ✅ Data processing and cleaning
-- ✅ Storage in organized structure
-- ✅ Categorical variable mappings
+## ⚙️ Funcionalidades Implementadas
 
-### 2. **Machine Learning Model**
-- ✅ Exploratory Data Analysis (EDA)
-- ✅ Feature Engineering
-- ✅ Training with LightGBM
-- ✅ Experiment tracking with MLflow
-- ✅ MlFlow for experiment and versioning
+### 🧩 Pipeline de Dados
 
+* ✅ Extração e limpeza de dados históricos.
+* ✅ Engenharia de Features de séries temporais (Lags, Retornos).
+* ✅ Cálculo de Indicadores Técnicos (MACD, RSI).
 
-### 3. **User Interface**
-- ✅ Interactive dashboard in Streamlit
-- ✅ Data and results visualizations
-- ✅ Real-time prediction interface
-- ✅ Simpy Last Mile simulation
+### 🤖 Modelagem de Machine Learning
 
-## 🛠️ Technologies Used
+* ✅ Otimização de hiperparâmetros com **HalvingGridSearchCV**.
+* ✅ Treinamento com **XGBoost Regressor** (modelo vencedor).
+* ✅ Rastreamento de experimentos e versionamento com **MLflow**.
+* ✅ Análise de interpretabilidade com **SHAP Values**.
 
-- **Python 3.11.x**
-- **Pandas & NumPy** for data manipulation
-- **Statsmodels & Scipy** for statistics
-- **Scikit-learn** for ML pipeline
-- **LightGBM** for ML modeling
-- **Shap** for feature importances
-- **MLflow** for experiment tracking
-- **Streamlit** for interactive dashboard
-- **Matplotlib, Seaborn & Plotly** for visualizations
-- **Simpy** for simulation
+---
 
-## ⚙️ Setup and Installation
+## 🧰 Tecnologias Utilizadas
 
-### Prerequisites
-- Python 3.11.x
-- Conda installed globally
-- Poetry installed globally
+* **Python 3.11.x**
+* **Pandas** e **NumPy** — manipulação de dados.
+* **Scikit-learn** — pipelines e validação.
+* **Category-Encoder** — feature target encoder.
+* **XGBoost** e **LightGBM** — modelagem preditiva.
+* **SHAP** — interpretabilidade de modelos.
+* **Matplotlib e Seaborn** — visualizações.
 
-### Step by step:
+---
 
-**Environment Variables Setup (Critical)**
-1. Create an account at https://dagshub.com/ and generate a token from your profile settings.
-2. You must set up your environment variables (including DAGsHub credentials and MLflow URI) before installing dependencies.
+## ⚙️ Setup e Instalação
 
-**Option 1: Installation via Conda and pip (Recommended)**
-1. **Clone the repository:**
+### Pré-requisitos
+
+* Python 3.11+
+* [Poetry](https://python-poetry.org/) instalado globalmente.
+
+### Passos
+
 ```bash
-git clone https://github.com/IgorComune/tech_challenge_ml_engineer_phase3.git
-cd tech_challenge_ml_engineer_phase3
-```
+# 1. Clonar o repositório
+git clone https://github.com/ederray/etl-aws.git
+cd etl-aws
 
-2. **Create a conda environment:**
-```bash
-conda create -n tech_challenge python=3.11.9
-conda activate tech_challenge
-```
-
-3. **Install dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Run the project:**
-**Streamlit Dashboard:**
-```bash
-streamlit run app.py
-```
-
-**Option 2: Installation via Poetry**
-1. **Clone the repository:**
-```bash
-git clone [https://github.com/IgorComune/tech_challenge_ml_engineer_phase3.git](https://github.com/IgorComune/tech_challenge_ml_engineer_phase3.git)
-cd tech_challenge_ml_engineer_phase3
-```
-
-2. **Install dependencies and create the Poetry virtual environment:**
-```bash
-# This command automatically reads pyproject.toml, creates the .venv (virtual environment), and installs all dependencies.
+# 2. Instalar dependências
 poetry install
-```
 
-3. **Activate the environment:**
-```bash
-# This command spawns a shell in the project's virtual environment.
+# 3. Ativar ambiente virtual
 poetry shell
 ```
 
-4. **Running the Project:**
-**Streamlit Dashboard:**
-```bash
-streamlit run app.py
+
+## ☁️ Implantação AWS Serverless
+
+A arquitetura MLOps foi projetada de forma **serverless**, aproveitando os serviços gerenciados da AWS para garantir **escalabilidade**, **baixo custo** e **observabilidade**:
+
+| Serviço AWS                       | Função               | Descrição                                                |
+| --------------------------------- | -------------------- | -------------------------------------------------------- |
+| **S3**                            | Data Lake            | Armazena dados brutos, processados e previsão.           |
+| **Lambda**                        | Trigger              | Funções automáticas para ETL e previsão.                 |
+| **Glue**                          | ETL                  | ETL e catálogo de dados.                                 |
+| **Athena**                        | Análise de dados     | Agendamento de execuções e reprocessamentos.             |
+| **CloudWatch**                    | Logs e Métricas      | Monitoramento de pipelines e funções.                    |
+| **ECR**                           | Repositório Docker   | Armazena e versiona imagens Docker usadas em jobs de ML. |
+
+Fluxo simplificado:
+
+```
+S3 (Raw Data)
+   ↓
+Lambda (Preprocessing)
+   ↓
+Glue (Preprocessing)
+   ↓
+Glue Catalog (Preprocessing)
+   ↓
+S3 (Processed)
+   ↓
+Lambda (Prediction)
+   ↓
+S3 (Predicted)
+   ↓
+Athena (Data Ananyliss)
+
 ```
 
-## 📈 Results and Insights
+---
 
-### Business Impact
-- Improvement in on-Time Delivery (OTD) SLA (120 minutes) rate from 41% to 70% with Predictive model and corrective real-time actions.
+## 📈 Resultados e Insights Finais
 
-### Exploratory Analysis
-- Identification of key delivery patterns based on categorical features.
-- Development of new predictive features based on categorical patterns and statistics test.
-- Correlation between weather conditions and delivery time
-- Traffic impact on logistics performance.
+| Métrica                 | Valor                  | Insights                                                    |
+| ----------------------- | ---------------------- | ----------------------------------------------------------- |
+| **MAE (Teste)**         | ≈ 0.81                 | Baixo erro absoluto, indicando previsões de preço precisas. |
+| **Overfitting**         | Controlado (Gamma=1.0) | Regularização forte garantiu robustez e generalização.      |
 
-### Model Performance
-- LightGBM model for OTD prediction
-- Evaluation metrics available in MLflow
-- Feature importance visualization with Shap
-
-### Interactive Dashboard
-- User-friendly interface for data analysis
-- Real-time predictions
-- Interactive result visualizations
-
-### Simulation Last Mile Process
-- Implementation of politics in real-time logistics (e.g., re-routing, agent reassignment), resulting in a measurable uplift in On-Time Delivery (OTD) performance.
-
-## 📁 Data Structure
-
-### Processed Data:
-- `amazon_delivery_processed.csv` - Complete processed dataset
-
-### Models:
-- `models:/LightGBM_Ajustado/Production` - Versioned LightGBM
-
-## 🧪 Testing and Validation
-- Test notebooks available in `tests/`
-
-## 🤝 Contribution
-
-This project was developed as part of Phase 3 Tech Challenge. Feedback and suggestions are welcome!
-
-## 📄 License
-
-This project is under the license specified in the `LICENSE` file.
 
 ---
 
-**Project:** Tech Challenge ML Engineer - Phase 3  
-**Institution:** Pós-Tech
+## 🧪 Testes e Validação
+
+Notebooks de validação (Curva de Aprendizagem e análise SHAP) estão disponíveis em:
+`notebooks/02_MODEL_VALIDATION/`
 
 ---
 
-*"Transforming data into insights, insights into value."*
+## 🤝 Contribuições
+
+Este projeto foi desenvolvido como parte do **Tech Challenge**.
+Pull requests e issues são bem-vindos!
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença especificada no arquivo **LICENSE**.
+
+
+

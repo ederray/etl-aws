@@ -221,45 +221,6 @@ def treinar_sarimax_por_acao_com_exog(
     return modelos_sarimax
 
 
-
-
-def criar_pipeline_catboost(X_treino):
-    """
-    Cria e retorna o pipeline completo para o modelo CatBoost.
-    """
-    # Define colunas numéricas e categóricas
-    colunas_numericas = X_treino.select_dtypes(include=np.number).columns.tolist()
-    colunas_categoricas = ['ticker', 'tipo', 'setor', 'industria']
-    
-    # Define o pré-processador
-    preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', StandardScaler(), colunas_numericas),
-            ('cat', 'passthrough', colunas_categoricas)
-        ],
-        remainder='drop'
-    )
-    
-    # Define os índices das colunas categóricas para o CatBoost
-    cat_features_indices = list(range(len(colunas_numericas), len(colunas_numericas) + len(colunas_categoricas)))
-    
-    # Cria a instância do modelo CatBoost
-    catboost_model = CatBoostRegressor(
-        random_state=42, 
-        verbose=0,
-        cat_features=cat_features_indices
-    )
-    
-    # Cria e retorna o pipeline
-    pipeline = Pipeline(steps=[
-        ('preprocessador', preprocessor),
-        ('modelo', catboost_model)
-    ])
-    
-    return pipeline
-
-
-
 def gerar_halving_random_search_cv(
     pipeline=Pipeline,
     param_grid=dict,
