@@ -11,7 +11,7 @@ O projeto combina **engenharia de dados, automação em nuvem e modelagem predit
 
 ## 🏗️ Arquitetura do Projeto
 
-![Arquitetura do Projeto](reports\Arquitetura_ETL_na_AWS.png)
+![Arquitetura do Projeto](reports/Arquitetura_ETL_na_AWS.png)
 
 ---
 
